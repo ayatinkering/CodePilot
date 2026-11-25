@@ -6,8 +6,8 @@ precedence over any aspirational capability description.
 
 | Milestone | Feature | Verification gate | Status |
 |---|---|---|---|
-| M0 | Bootstrap, bounded configuration, schema, health | Clean install, health, ignored secrets | Verified locally (7 tests); push pending |
-| M1 | Safe checkout, worker/events, restricted runner | Original unchanged, failure/timeout/cancel | Planned |
+| M0 | Bootstrap, bounded configuration, schema, health | Clean install, health, ignored secrets | Verified; pushed 7cb9d0e; CI passed |
+| M1 | Safe checkout, worker/events, restricted runner | Original unchanged, failure/timeout/cancel | Partial: local checks pass; live Docker checks blocked |
 | M2 | Tree-sitter symbols/approximate edges | Structural and malformed fixtures | Planned |
 | M3 | Real semantic embeddings and hybrid search | Semantic query, deletion/revision invalidation | Planned |
 | M4 | Gemini typed planning | Real call, malformed output, outage | Blocked live: credential absent |

@@ -48,3 +48,27 @@ See [checklist](docs/planning/checklist.md), [capability evidence](docs/evidence
 [lessons](docs/lessons/M0-foundation.md), and [build log](docs/build-log.md).
 Dependencies are locked in `uv.lock`; no project license has been selected yet.
 GitHub App webhooks, live PR automation, semantic retrieval, and evaluation are planned.
+
+## Partial M1: queue and worker
+
+The worker stops after baseline; a passing baseline currently abstains with
+`pipeline_not_implemented_after_baseline`. Container execution is unverified.
+
+```sh
+# Operator-controlled allowlist, not inferred from an issue or repository README.
+export CODEPILOT_ALLOWED_REPOS=/absolute/path/to/trusted/python/repository
+# Separate operator preparation (requires running Docker):
+docker build -t codepilot-runner:dev runner
+export CODEPILOT_RUNNER_IMAGE=$(docker image inspect codepilot-runner:dev --format '{{.Id}}')
+uv run --locked codepilot submit /absolute/path/to/trusted/python/repository 'Describe the issue'
+uv run --locked codepilot worker
+# In another terminal, using the run ID printed by submit:
+uv run --locked codepilot status RUN_ID
+uv run --locked codepilot cancel RUN_ID
+```
+
+Linux worker only (`flock`). Stop with Ctrl-C; next startup marks active work
+interrupted. Retry and remote acquisition are not implemented. Snapshots/reports
+under `.codepilot/runs` may contain repository source: keep them local. Image build
+requires network; execution never installs target dependencies. Docker access is
+privileged; never expose this worker publicly or mount the socket into target code.

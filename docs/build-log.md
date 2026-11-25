@@ -15,3 +15,14 @@ Commit reference: the commit introducing this section (`feat(core): bootstrap lo
 Push status at commit creation: pending; record remote SHA in the next log update.
 Failures: sandbox network/async test restriction, corrected lint, Docker unavailable.
 Live Gemini remains blocked on local credential setup. No successes fabricated.
+
+M0 remote confirmed: `7cb9d0e8d87630e633c9d0bb857181e4b3e4a1f1`.
+Draft implementation PR: https://github.com/ayatinkering/CodePilot/pull/1
+GitHub CI passed: https://github.com/ayatinkering/CodePilot/actions/runs/45567422409
+
+## M1 partial — acquisition and worker
+16 local tests passed; lint/format passed. Real snapshot and missing-image worker
+flow verified. Container boundary checks blocked because Docker is not running.
+See evidence/M1-verification.md and lessons/M1-snapshots-and-jobs.md.
+Commit reference: commit introducing this section; push pending at creation.
+Do not mark M1 complete until live runner, timeout and cancellation checks pass.

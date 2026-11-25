@@ -1,13 +1,25 @@
 import argparse
 import json
+import os
+from pathlib import Path
 
-from codepilot.config import Settings
+from codepilot.acquisition import git
+from codepilot.config import Budgets, Settings
+from codepilot.jobs import Jobs
 from codepilot.storage import Store
 
 
 def main():
     parser = argparse.ArgumentParser(description="CodePilot local control plane")
-    parser.add_argument("command", choices=["health", "serve"])
+    commands = parser.add_subparsers(dest="command", required=True)
+    for name in ["health", "serve", "worker"]:
+        commands.add_parser(name)
+    submit = commands.add_parser("submit")
+    submit.add_argument("repository", type=Path)
+    submit.add_argument("task")
+    for name in ["status", "cancel"]:
+        command = commands.add_parser(name)
+        command.add_argument("run_id")
     args = parser.parse_args()
     settings = Settings()
     if args.command == "serve":
@@ -16,7 +28,41 @@ def main():
         from codepilot.api import create_app
 
         uvicorn.run(create_app(settings), host="127.0.0.1", port=8000)
-    else:
-        store = Store(settings.data_dir / "codepilot.sqlite3")
-        store.initialize()
+        return
+    if args.command == "worker":
+        from codepilot.worker import main as worker_main
+
+        worker_main()
+        return
+    store = Store(settings.data_dir / "codepilot.sqlite3")
+    store.initialize()
+    jobs = Jobs(store)
+    if args.command == "health":
         print(json.dumps({"status": "ok", "schema_version": store.health()}))
+    elif args.command == "submit":
+        repo = args.repository.absolute()
+        allowed = [
+            Path(p).resolve()
+            for p in os.environ.get("CODEPILOT_ALLOWED_REPOS", "").split(os.pathsep)
+            if p
+        ]
+        if repo != repo.resolve() or repo not in allowed or ".." in repo.parts:
+            parser.error("Repository must be explicitly allowlisted and have no symlink/traversal")
+        if not 1 <= len(args.task) <= 10000:
+            parser.error("Task must contain 1–10000 characters")
+        sha = git(repo, "rev-parse", "--verify", "HEAD^{commit}").decode().strip()
+        print(
+            jobs.submit(
+                {"repository": str(repo), "text": args.task, "mode": "repair"},
+                sha,
+                Budgets(),
+                {"provider": settings.provider, "model": settings.model},
+            )
+        )
+    elif args.command == "cancel":
+        jobs.transition(args.run_id, "cancelled", "operator_cancelled")
+        print(json.dumps({"state": "cancelled"}))
+    else:
+        print(
+            json.dumps({"run": jobs.get(args.run_id), "events": jobs.events(args.run_id)}, indent=2)
+        )

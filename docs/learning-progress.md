@@ -9,3 +9,5 @@
 | Retrieval, patching, runner | Unintroduced | No | Unassessed | None established | Later milestones | Planning checklist |
 
 Explained does not mean practiced or demonstrated. Record actual learner answers only.
+
+Snapshots, transactions, worker ownership and baseline classification explained in M1 lesson; exercises/teach-back unassessed.
