@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     data_dir: Path = Path(".codepilot")
     provider: Literal["gemini", "offline"] = "gemini"
     model: str = ""
+    runner_image: str = ""
+    github_repo: str = "ayatinkering/CodePilot"
 
     gemini_api_key: SecretStr = Field(
         default=SecretStr(""), alias="GEMINI_API_KEY", exclude=True, repr=False

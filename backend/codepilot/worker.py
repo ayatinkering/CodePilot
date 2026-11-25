@@ -10,7 +10,9 @@ from pathlib import Path
 
 from codepilot.acquisition import acquire
 from codepilot.config import Budgets, Settings
+from codepilot.demo import registry
 from codepilot.jobs import Jobs
+from codepilot.pipeline import execute_pipeline
 from codepilot.runner import run_tests
 from codepilot.storage import Store
 
@@ -48,10 +50,10 @@ def execute_one(jobs: Jobs, settings: Settings, allowed: list[Path], image: str)
         (directory / "baseline-report.json").write_text(json.dumps(result, indent=2))
         if not cancelled():
             if result["status"] == "passed":
-                jobs.transition(run_id, "abstained", "pipeline_not_implemented_after_baseline")
+                execute_pipeline(jobs, settings, run_id, directory, manifest, image)
             else:
                 jobs.transition(run_id, "failed", result["status"])
-    except (OSError, ValueError, KeyError, subprocess.SubprocessError):
+    except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError):
         # No arbitrary exception/target text is copied into persisted public events.
         if not cancelled():
             jobs.transition(run_id, "failed", "preparation_or_runner_error")
@@ -67,7 +69,10 @@ def main():
     allowed = [
         Path(p) for p in os.environ.get("CODEPILOT_ALLOWED_REPOS", "").split(os.pathsep) if p
     ]
-    image = os.environ.get("CODEPILOT_RUNNER_IMAGE", "")
+    allowed.extend(
+        Path(r["path"]) for r in registry(settings.data_dir).values() if r.get("trusted")
+    )
+    image = settings.runner_image
     with worker_lock(settings.data_dir):
         jobs.recover()
         while True:

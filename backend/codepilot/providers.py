@@ -61,12 +61,14 @@ def redact(text: str) -> str:
 
 
 class GeminiProvider:
-    def __init__(self, key: str, model: str):
+    def __init__(self, key: str, model: str, schema=Plan, instruction=SYSTEM):
         if not key.strip():
             raise ProviderFailure("gemini_key_missing")
         if not re.fullmatch(r"gemini-[a-zA-Z0-9._-]+", model):
             raise ProviderFailure("explicit_gemini_model_required")
         self.model = model
+        self.schema = schema
+        self.instruction = instruction
         self.client = genai.Client(
             api_key=key,
             http_options=types.HttpOptions(
@@ -83,11 +85,11 @@ class GeminiProvider:
                 model=self.model,
                 contents=contents,
                 config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM,
+                    system_instruction=self.instruction,
                     temperature=0,
                     max_output_tokens=max_output_tokens,
                     response_mime_type="application/json",
-                    response_json_schema=Plan.model_json_schema(),
+                    response_json_schema=self.schema.model_json_schema(),
                     automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
                 ),
             )

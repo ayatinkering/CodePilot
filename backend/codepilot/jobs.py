@@ -28,6 +28,7 @@ NEXT = {
     "repairing": {"generating"},
     "ready_for_review": {"publishing", "cancelled"},
     "publishing": {"published", "publication_uncertain"},
+    "publication_uncertain": {"publishing"},
 }
 
 
@@ -74,6 +75,17 @@ class Jobs:
             if row is None:
                 raise KeyError(run_id)
             return dict(row)
+
+    def list(self):
+        with self.store.connect() as db:
+            return [
+                dict(r) for r in db.execute("SELECT * FROM runs ORDER BY created_at DESC LIMIT 100")
+            ]
+
+    def record(self, run_id, event_type, payload):
+        with self.store.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            self._event(db, run_id, event_type, payload)
 
     def events(self, run_id, after=0):
         with self.store.connect() as db:
