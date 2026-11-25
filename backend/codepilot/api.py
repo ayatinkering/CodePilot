@@ -35,7 +35,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "live_generation_verified": False,
             "runner_verified": False,
             "supported_targets": ["trusted Python 3.12 / pytest (planned)"],
-            "milestone": "M0",
+            "milestone": "M0 verified; M1/M2/M4 partial",
+            "gemini_key_configured": bool(settings.gemini_api_key.get_secret_value()),
+            "structural_index_available": True,
+            "repair_pipeline_available": False,
         }
 
     return app

@@ -31,7 +31,7 @@ chooses local storage (default `.codepilot`); `CODEPILOT_PROVIDER` is `gemini` o
 `GEMINI_API_KEY` is reserved for backend-only live calls. Obtain keys through
 [Google AI Studio](https://aistudio.google.com/apikey); enter them locally, never in
 chat, tracked files, frontend code, logs, or target containers. No key is needed
-for foundation tests. No live adapter or automatic model selection exists yet.
+for foundation tests. Gemini planning adapter exists; live access remains unverified. There is no automatic model selection.
 
 Docker Engine/Desktop must be running before target validation can be implemented
 and verified. No host execution fallback is permitted. Initial targets will be
@@ -81,3 +81,18 @@ index in that run's directory. This debug inspection does not bypass the baselin
 gate or mark the run validated. Symbols, ranges, parse errors, advisory metrics and
 heuristic/unresolved call references are inspectable; cross-file import resolution
 and semantic retrieval are not implemented yet.
+
+## Gemini planning smoke check (partial M4)
+
+Configure `GEMINI_API_KEY` and an available exact `CODEPILOT_MODEL` locally in
+ignored `.env`. Do not paste keys into chat. Then:
+
+```sh
+uv run --locked codepilot plan-smoke
+# Explicit test fixture; this is not a live model:
+CODEPILOT_PROVIDER=offline uv run --locked codepilot plan-smoke
+```
+
+Live smoke sends only a small synthetic boundary-condition task. It may incur
+provider usage. A missing key/model fails visibly; it never silently selects the
+fake provider. The adapter is not yet wired into the worker repair pipeline.

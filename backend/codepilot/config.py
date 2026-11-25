@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,3 +26,7 @@ class Settings(BaseSettings):
     data_dir: Path = Path(".codepilot")
     provider: Literal["gemini", "offline"] = "gemini"
     model: str = ""
+
+    gemini_api_key: SecretStr = Field(
+        default=SecretStr(""), alias="GEMINI_API_KEY", exclude=True, repr=False
+    )

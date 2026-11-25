@@ -35,3 +35,12 @@ metrics. 20 tests passed; actual CLI indexed 15 Python files / 68 symbols from
 M1 commit. See evidence/M2-verification.md and lessons/M2-structural-index.md.
 Cross-file/alias linking remains partial. Commit reference: introducing commit;
 push pending at creation. No live generation or end-to-end repair claimed.
+
+M2 core remote confirmed: `1bbeaf2ec2e36df80f72cee7a8eca9b72760da4c`.
+
+## M4 adapter-only checkpoint (M3 still planned)
+Selected Gemini implemented behind a typed planner interface. 28 tests pass.
+Offline abstention and real missing-key failure observed; no live generation.
+See evidence/M4-verification.md and lessons/M4-gemini-planning.md.
+Dependency-independent work proceeded while Docker/key remained unavailable.
+Commit reference: introducing commit; push pending at creation.

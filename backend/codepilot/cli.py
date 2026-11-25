@@ -12,7 +12,7 @@ from codepilot.storage import Store
 def main():
     parser = argparse.ArgumentParser(description="CodePilot local control plane")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ["health", "serve", "worker"]:
+    for name in ["health", "serve", "worker", "plan-smoke"]:
         commands.add_parser(name)
     submit = commands.add_parser("submit")
     submit.add_argument("repository", type=Path)
@@ -22,6 +22,45 @@ def main():
         command.add_argument("run_id")
     args = parser.parse_args()
     settings = Settings()
+    if args.command == "plan-smoke":
+        from codepilot.providers import (
+            Evidence,
+            GeminiProvider,
+            OfflineProvider,
+            ProviderFailure,
+            plan_task,
+        )
+
+        provider = None
+        try:
+            provider = (
+                OfflineProvider()
+                if settings.provider == "offline"
+                else GeminiProvider(settings.gemini_api_key.get_secret_value(), settings.model)
+            )
+            print(
+                json.dumps(
+                    plan_task(
+                        provider,
+                        "Apply the discount starting at age 18, including 18.",
+                        [
+                            Evidence(
+                                id="example:1",
+                                path="src/example.py",
+                                text="def discount(age): return age > 18",
+                            )
+                        ],
+                        {"src/example.py"},
+                    ),
+                    indent=2,
+                )
+            )
+        except ProviderFailure as exc:
+            parser.exit(2, str(exc) + "\n")
+        finally:
+            if isinstance(provider, GeminiProvider):
+                provider.close()
+        return
     if args.command == "serve":
         import uvicorn
 
