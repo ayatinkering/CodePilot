@@ -61,18 +61,20 @@ def redact(text: str) -> str:
 
 
 class GeminiProvider:
-    def __init__(self, key: str, model: str, schema=Plan, instruction=SYSTEM):
+    def __init__(self, key: str, model: str, schema=Plan, instruction=SYSTEM, timeout_ms=60000):
         if not key.strip():
             raise ProviderFailure("gemini_key_missing")
         if not re.fullmatch(r"gemini-[a-zA-Z0-9._-]+", model):
             raise ProviderFailure("explicit_gemini_model_required")
+        self._key = key
         self.model = model
         self.schema = schema
         self.instruction = instruction
         self.client = genai.Client(
             api_key=key,
             http_options=types.HttpOptions(
-                timeout=60000, retry_options=types.HttpRetryOptions(attempts=1)
+                timeout=max(1, min(60000, timeout_ms)),
+                retry_options=types.HttpRetryOptions(attempts=1),
             ),
         )
 
@@ -83,7 +85,7 @@ class GeminiProvider:
         try:
             response = self.client.models.generate_content(
                 model=self.model,
-                contents=contents,
+                contents=contents.replace(self._key, "[REDACTED]"),
                 config=types.GenerateContentConfig(
                     system_instruction=self.instruction,
                     temperature=0,
@@ -110,7 +112,10 @@ class GeminiProvider:
             raise ProviderFailure("gemini_empty_or_blocked_response")
         usage = response.usage_metadata
         return Reply(
-            redact(response.text), usage.total_token_count if usage else None, self.model, "live"
+            redact(response.text.replace(self._key, "[REDACTED]")),
+            usage.total_token_count if usage else None,
+            self.model,
+            "live",
         )
 
 
@@ -193,3 +198,31 @@ def plan_task(
                 "\nPrevious output failed schema/evidence/policy validation. Return a valid Plan."
             )
     raise ProviderFailure("planning_budget_exhausted")
+
+
+class MeteredProvider:
+    """Reserve before dispatch; even failed requests consume the shared call budget."""
+
+    def __init__(self, provider, usage, budgets, check):
+        self.provider, self.usage, self.budgets, self.check = provider, usage, budgets, check
+
+    def generate(self, contents, max_output_tokens):
+        self.check()
+        reserved = len(contents.encode()) + max_output_tokens
+        if self.usage["calls"] >= self.budgets.generation_calls:
+            raise ProviderFailure("generation_call_budget_exhausted")
+        if self.usage["tokens"] + reserved > self.budgets.tokens:
+            raise ProviderFailure("generation_token_budget_exhausted")
+        self.usage["calls"] += 1
+        try:
+            reply = self.provider.generate(contents, max_output_tokens)
+        except ProviderFailure:
+            self.usage["tokens"] += reserved
+            self.usage["usage_known"] = False
+            raise
+        self.usage["tokens"] += reply.tokens if reply.tokens is not None else reserved
+        self.usage["usage_known"] &= reply.tokens is not None
+        self.check()
+        if self.usage["tokens"] > self.budgets.tokens:
+            raise ProviderFailure("generation_token_budget_exceeded")
+        return reply

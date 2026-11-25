@@ -1,7 +1,11 @@
 # CodePilot
 
-A local, AI-assisted software-maintenance research prototype. **This MVP uses
-scripted proposals on controlled Python fixtures; it does not claim live AI repair.**
+A local, AI-assisted software-maintenance research prototype. **This MVP supports live Gemini generation and a separately labeled offline scripted mode
+on controlled Python fixtures.**
+Two live Gemini fixture runs (repair and refactoring) passed independent Docker
+validation. [Raw live evidence](docs/evidence/live-generation.json) is separate from
+the scripted acceptance suite.
+
 Parsing, local embeddings, hybrid retrieval, Docker validation, the review API/UI,
 GitHub issue import, and approved draft PR publication are implemented.
 
@@ -25,7 +29,10 @@ docker image inspect codepilot-runner:dev --format '{{.Id}}'
 ```
 
 Put the printed `sha256:...` value after `CODEPILOT_RUNNER_IMAGE=` in `.env`.
-No Gemini or OpenAI key is required. Then run:
+No API key is required for offline mode. For live generation, set `GEMINI_API_KEY`
+in the ignored `.env` and set `CODEPILOT_MODEL=gemini-3.5-flash`. Never paste keys
+in chat or commit them. Live mode sends selected task/source to Google and uses
+API quota. Then run:
 
 ```sh
 ./scripts/start-demo.sh
@@ -33,10 +40,15 @@ No Gemini or OpenAI key is required. Then run:
 
 Open [CodePilot locally](http://127.0.0.1:8000). Keep the terminal open; Ctrl-C stops
 both processes. The startup script prepares five trusted Git fixture repositories.
-Select **boundary**, keep **Offline scripted demo**, and click **Start run**. After
+Select **boundary**, choose **Live Gemini** (or **Offline scripted demo**), and click
+**Start run**. Live mode generates a new plan, patch and auxiliary test from the task. After
 validation, inspect **Diff**, **Checks**, **Plan**, and **Source**. Select **refactor**
 for the extract-helper example. The remaining targets demonstrate failures.
-Task text changes retrieval, but the offline proposal remains a fixed fixture script.
+In offline mode, task text changes retrieval, but the proposal remains a fixed fixture
+script. Live mode never falls back to that script: outages, quotas, malformed output
+and validation failures are recorded as stopped runs. Use Retry after resolving a
+provider problem; it keeps the original base and model. In-flight calls are bounded
+to 60 seconds, so cancellation may wait for the current request to finish.
 
 If port 8000 or the worker lock is occupied, stop the previous CodePilot process.
 Do not run the evaluation command while the worker is running. An interrupted run
@@ -84,9 +96,8 @@ See [raw results and summary](evaluation/results/summary.md),
 
 Local single-user, trusted Python fixtures only. No arbitrary repository execution,
 remote GitHub App/webhooks, public hosting, automatic merging, model training, or
-live Gemini verification. Live generation is excluded from the MVP at the user's
-request; its experimental adapter remains in source, while the UI/API accept offline
-runs only. Tree-sitter edges and smell metrics are approximate. Test success is not
+unrestricted AI execution. Live generation uses a pinned per-run model, bounded calls
+and tokens, typed JSON output, protected tests and human review. Tree-sitter edges and smell metrics are approximate. Test success is not
 proof of correctness. Browser visual verification remains pending due to the desktop
 app's unavailable browser attachment; API flows and frontend compilation are tested.
 

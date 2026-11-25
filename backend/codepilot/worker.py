@@ -37,6 +37,7 @@ def execute_one(jobs: Jobs, settings: Settings, allowed: list[Path], image: str)
     budgets = Budgets.model_validate_json(run["budgets_json"])
     directory = settings.data_dir / "runs" / run_id
     directory.mkdir(parents=True)
+    started = time.monotonic()
     cancelled = lambda: jobs.get(run_id)["state"] == "cancelled"
     try:
         manifest = acquire(
@@ -46,11 +47,16 @@ def execute_one(jobs: Jobs, settings: Settings, allowed: list[Path], image: str)
         if cancelled():
             return True
         jobs.transition(run_id, "baselining")
-        result = run_tests(directory / "baseline", image, budgets.test_seconds, cancelled)
+        result = run_tests(
+            directory / "baseline",
+            image,
+            min(budgets.test_seconds, budgets.wall_seconds),
+            cancelled,
+        )
         (directory / "baseline-report.json").write_text(json.dumps(result, indent=2))
         if not cancelled():
             if result["status"] == "passed":
-                execute_pipeline(jobs, settings, run_id, directory, manifest, image)
+                execute_pipeline(jobs, settings, run_id, directory, manifest, image, started)
             else:
                 jobs.transition(run_id, "failed", result["status"])
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError):

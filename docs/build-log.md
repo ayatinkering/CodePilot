@@ -103,3 +103,29 @@ The final startup script served the dashboard and API; SSE Last-Event-ID=2 resum
 at event 3. Visual walkthrough remains blocked by the desktop browser attachment,
 which reported an app-update/network-policy requirement. No screenshot or visual
 verification is claimed. See `docs/demo-guide.md` for the concise presentation.
+
+## Live Gemini completion — 2026-11-25
+
+User re-authorized live generation. The local credential was configured by the user,
+never printed or committed. Model discovery worked. Gemini 3.1 Flash Lite and 3.8
+Flash returned 503; Gemini 3.5 Flash returned a valid typed plan and was explicitly
+selected. No silent provider/model fallback exists in application runs.
+
+The API/dashboard now support live Gemini and distinctly labeled offline mode.
+Request accounting includes failures and unknown-usage reservations; the exact call
+limit no longer prevents validating the last allowed response. Prior candidate edits
+and coarse outcomes support repairs without exposing protected evaluator content.
+Publication descriptions now reflect actual provider/model provenance.
+
+Real run `b6432691a6a843d29c9e0e17f0797a0f`: Gemini-generated boundary repair passed
+original, independent and auxiliary Docker checks; 2 calls, 3,150 reported tokens.
+Reviewed change published as draft PR #4 on the isolated fixture branch.
+Real run `c19c00b2801749d882a65da202514523`: Gemini-generated helper extraction passed
+behavior checks; target function 7→6 lines; 2 calls, 4,086 reported tokens.
+Raw evidence is in `docs/evidence/live-generation.json`; setup probes are separate.
+
+Final validation: 56 tests passed including real Docker isolation tests, Ruff passed,
+and the React production build passed. Browser visual verification remains pending
+because the desktop browser attachment was unavailable. This completes the basic
+controlled-fixture MVP with live generation, not the original PRD's advanced/general
+research scope. No merges, hosting, or model training performed.

@@ -139,3 +139,34 @@ def test_provider_reports_safe_error_category(monkeypatch, code, category):
     with pytest.raises(ProviderFailure, match=f"^gemini_{category}$"):
         provider.generate("synthetic prompt", 2048)
     provider.close()
+
+
+def test_metered_calls_stop_before_extra_request_and_account_unknown_usage():
+    from codepilot.config import Budgets
+    from codepilot.providers import MeteredProvider
+
+    usage = {"calls": 0, "tokens": 0, "usage_known": True}
+    metered = MeteredProvider(
+        Scripted([output()]), usage, Budgets(generation_calls=1), lambda: None
+    )
+    metered.generate("task", 2048)
+    assert usage["calls"] == 1
+    with pytest.raises(ProviderFailure, match="call_budget_exhausted"):
+        metered.generate("task", 2048)
+    assert usage["calls"] == 1
+
+
+def test_metered_cancel_after_response_retains_usage():
+    from codepilot.config import Budgets
+    from codepilot.providers import MeteredProvider
+
+    usage = {"calls": 0, "tokens": 0, "usage_known": True}
+
+    def check():
+        if usage["calls"]:
+            raise ProviderFailure("cancelled")
+
+    metered = MeteredProvider(Scripted([output()]), usage, Budgets(), check)
+    with pytest.raises(ProviderFailure, match="cancelled"):
+        metered.generate("task", 2048)
+    assert usage["calls"] == 1 and usage["tokens"] == 100

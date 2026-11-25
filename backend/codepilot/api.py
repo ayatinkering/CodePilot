@@ -26,7 +26,7 @@ class RunInput(BaseModel):
     repository_id: str
     task: str = Field(min_length=1, max_length=10000)
     mode: Literal["repair", "refactor"] = "repair"
-    provider: Literal["offline"] = "offline"
+    provider: Literal["offline", "gemini"] = "offline"
     issue_number: int | None = Field(default=None, ge=1)
     base_sha: str | None = Field(default=None, pattern=r"^[0-9a-f]{40}$")
     budgets: Budgets = Field(default_factory=Budgets)
@@ -92,7 +92,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "gemini_key_configured": bool(settings.gemini_api_key.get_secret_value()),
             "runner_configured": bool(settings.runner_image),
             "embedding_model_prepared": (settings.data_dir / "models").exists(),
-            "live_generation_verified": False,
+            "live_generation_verified": any(
+                r["state"] in {"ready_for_review", "published"}
+                and json.loads(r["provider_json"]).get("provider") == "gemini"
+                and json.loads(r["provider_json"]).get("model") == settings.model
+                for r in jobs.list()
+            ),
             "supported_targets": ["Controlled Python fixtures; local single-user MVP"],
             "repair_pipeline_available": True,
             "github_app_webhooks": False,
@@ -114,6 +119,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.post("/api/runs", status_code=201)
     def submit(body: RunInput):
+        if body.provider == "gemini" and (
+            not settings.gemini_api_key.get_secret_value() or not settings.model
+        ):
+            raise HTTPException(
+                400, "Configure Gemini key and model locally before selecting live generation"
+            )
         entry = registry(settings.data_dir).get(body.repository_id)
         if not entry or not entry.get("trusted"):
             raise HTTPException(400, "Choose a registered trusted target")

@@ -10,7 +10,15 @@ from codepilot.config import Budgets
 from codepilot.demo import ROOT, registry
 from codepilot.indexing import findings, index_snapshot, parse_source
 from codepilot.patching import Edit, Proposal, apply_edits, digest
-from codepilot.providers import Evidence, GeminiProvider, Plan, ProviderFailure, plan_task, redact
+from codepilot.providers import (
+    Evidence,
+    GeminiProvider,
+    MeteredProvider,
+    Plan,
+    ProviderFailure,
+    plan_task,
+    redact,
+)
 from codepilot.retrieval import Embedder, build_index, search
 from codepilot.runner import run_tests
 
@@ -64,13 +72,13 @@ def total_order(items):
     )
 
 
-def execute_pipeline(jobs, settings, run_id, directory, manifest, image):
+def execute_pipeline(jobs, settings, run_id, directory, manifest, image, started=None):
     run = jobs.get(run_id)
     task = json.loads(run["task_json"])
     provider_config = json.loads(run["provider_json"])
     budgets = Budgets.model_validate_json(run["budgets_json"])
     baseline = directory / "baseline"
-    started = time.monotonic()
+    started = started if started is not None else time.monotonic()
     usage = {
         "calls": 0,
         "tokens": 0,
@@ -95,8 +103,6 @@ def execute_pipeline(jobs, settings, run_id, directory, manifest, image):
             raise ProviderFailure("cancelled")
         if time.monotonic() - started > budgets.wall_seconds:
             raise ProviderFailure("wall_budget_exhausted")
-        if usage["calls"] >= budgets.generation_calls or usage["tokens"] >= budgets.tokens:
-            raise ProviderFailure("generation_budget_exhausted")
 
     def run_suite(path):
         check()
@@ -176,20 +182,19 @@ def execute_pipeline(jobs, settings, run_id, directory, manifest, image):
         else:
             check()
             provider = GeminiProvider(
-                settings.gemini_api_key.get_secret_value(), provider_config["model"]
+                settings.gemini_api_key.get_secret_value(),
+                provider_config["model"],
+                timeout_ms=int(max(1, budgets.wall_seconds - (time.monotonic() - started)) * 1000),
             )
             try:
                 planned = plan_task(
-                    provider,
+                    MeteredProvider(provider, usage, budgets, check),
                     task["text"],
                     [Evidence(id=c["id"], path=c["path"], text=c["text"]) for c in context],
                     set(source),
                     max_calls=1,
                     token_budget=budgets.tokens,
                 )
-                usage["calls"] += planned["calls"]
-                usage["tokens"] += planned["tokens"]
-                usage["usage_known"] &= planned["usage_known"]
                 result["plan"] = planned["plan"]
             finally:
                 provider.close()
@@ -232,7 +237,16 @@ def execute_pipeline(jobs, settings, run_id, directory, manifest, image):
                             for p, v in source.items()
                         ],
                         "previous_failures": [
-                            {"attempt": a["attempt"], "failure": a.get("failure")}
+                            {
+                                "attempt": a["attempt"],
+                                "failure": a.get("failure"),
+                                "previous_edits": a.get("proposal", {}).get("edits", []),
+                                "existing_tests": a.get("existing_tests", {}).get("status"),
+                                "independent_checks_passed": a.get("evaluator_tests", {}).get(
+                                    "status"
+                                )
+                                == "passed",
+                            }
                             for a in result["attempts"]
                         ],
                     }
@@ -244,23 +258,22 @@ def execute_pipeline(jobs, settings, run_id, directory, manifest, image):
                         provider_config["model"],
                         schema=Proposal,
                         instruction=EDITOR_SYSTEM,
+                        timeout_ms=int(
+                            max(1, budgets.wall_seconds - (time.monotonic() - started)) * 1000
+                        ),
                     )
                     try:
-                        usage["calls"] += 1
-                        reply = provider.generate(contents, 4096)
-                        usage["tokens"] += (
-                            reply.tokens
-                            if reply.tokens is not None
-                            else len(contents.encode()) + 4096
+                        reply = MeteredProvider(provider, usage, budgets, check).generate(
+                            contents, 4096
                         )
-                        usage["usage_known"] &= reply.tokens is not None
-                        check()
                         proposal = Proposal.model_validate_json(reply.text)
                     finally:
                         provider.close()
                 if proposal.decision == "abstain":
                     raise ProviderFailure("model_abstained")
-                signature = digest(proposal.model_dump_json().encode())
+                signature = digest(
+                    json.dumps([e.model_dump() for e in proposal.edits], sort_keys=True).encode()
+                )
                 if signature in seen:
                     raise ProviderFailure("repeated_candidate_no_progress")
                 seen.add(signature)
@@ -330,6 +343,7 @@ def execute_pipeline(jobs, settings, run_id, directory, manifest, image):
                     result["patch_digest"] = patch["patch_digest"]
                     result["validation"] = "ready_for_review"
                     save()
+                    check()
                     jobs.transition(run_id, "ready_for_review")
                     return
             except (ValueError, SyntaxError, OSError) as exc:

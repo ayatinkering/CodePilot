@@ -14,11 +14,12 @@ function Status({value}:{value:string}){return <span className={'status '+(value
 function App(){
  const [repos,setRepos]=useState<Repo[]>([]),[runs,setRuns]=useState<Run[]>([]),[selected,setSelected]=useState(new URLSearchParams(location.search).get('run')||'');
  const [detail,setDetail]=useState<Detail|null>(null),[repo,setRepo]=useState('boundary'),[task,setTask]=useState(''),[mode,setMode]=useState('repair'),[provider,setProvider]=useState('offline');
+ const [cap,setCap]=useState<Record<string,any>>({});
  const [sessionReady,setSessionReady]=useState(false);
  const [base,setBase]=useState('');
  const [issue,setIssue]=useState(''),[issueNumber,setIssueNumber]=useState<number|undefined>();
  const [error,setError]=useState(''),[busy,setBusy]=useState(false),[tab,setTab]=useState('Diff'),[attempt,setAttempt]=useState(-1),[approved,setApproved]=useState(false);
- useEffect(()=>{api('/session',{}).then(async()=>{const [r,history]=await Promise.all([api('/repositories'),api('/runs')]);setRepos(r);setRuns(history);setSessionReady(true);if(r[0]){setRepo(r[0].id);setTask(r[0].task);setMode(r[0].mode)}if(!selected&&history[0])setSelected(history[0].id)}).catch(e=>setError(e.message))},[]);
+ useEffect(()=>{api('/session',{}).then(async()=>{const [r,history,c]=await Promise.all([api('/repositories'),api('/runs'),api('/capabilities')]);setCap(c);if(c.gemini_key_configured&&c.model)setProvider('gemini');setRepos(r);setRuns(history);setSessionReady(true);if(r[0]){setRepo(r[0].id);setTask(r[0].task);setMode(r[0].mode)}if(!selected&&history[0])setSelected(history[0].id)}).catch(e=>setError(e.message))},[]);
  useEffect(()=>{if(!selected||!sessionReady)return;let active=true;setApproved(false);setAttempt(-1);setDetail(null);history.replaceState(null,'','?run='+encodeURIComponent(selected));
   const refresh=()=>Promise.all([api('/runs/'+selected),api('/runs')]).then(([d,r])=>{if(active){setDetail(d);setRuns(r)}}).catch(e=>{if(active)setError(e.message)});
   refresh();const stream=new EventSource('/api/runs/'+selected+'/events');stream.onmessage=refresh;
@@ -36,8 +37,8 @@ function App(){
  <label htmlFor="repo">Trusted repository</label><select id="repo" value={repo} onChange={e=>{const r=repos.find(r=>r.id===e.target.value)!;setRepo(r.id);setTask(r.task);setMode(r.mode);setBase('');setIssueNumber(undefined)}}>{repos.map(r=><option key={r.id} value={r.id}>{label(r.id)}</option>)}</select>
  <label htmlFor="base">Commit SHA (optional)</label><input id="base" placeholder="Default: fixture HEAD" value={base} pattern="[0-9a-f]{40}" onChange={e=>setBase(e.target.value)}/>
  <label htmlFor="mode">Task type</label><select id="mode" value={mode} onChange={e=>setMode(e.target.value)}><option value="repair">Bug repair</option><option value="refactor">Extract helper</option></select>
- <label htmlFor="provider">Generation</label><select id="provider" value={provider} onChange={e=>setProvider(e.target.value)}><option value="offline">Offline scripted demo</option></select>
- <p className="hint">{provider==='offline'?'Fixed fixture proposal; task text does not generate new code. Parsing, retrieval and Docker checks are real.':'Live generation is outside this demo.'}</p>
+ <label htmlFor="provider">Generation</label><select id="provider" value={provider} onChange={e=>setProvider(e.target.value)}><option value="gemini" disabled={!cap.gemini_key_configured||!cap.model}>Live Gemini</option><option value="offline">Offline scripted demo</option></select>
+ <p className="hint">{provider==='offline'?'Fixed fixture proposal; task text does not generate new code. Parsing, retrieval and Docker checks are real.':`Gemini (${cap.model}) generates a new proposal from the task and source. This sends source to Google and uses API quota. No scripted fallback.`}</p>
  <label htmlFor="issue">GitHub issue number (optional)</label><input id="issue" type="number" min="1" value={issue} onChange={e=>setIssue(e.target.value)}/><button type="button" disabled={!issue||busy} onClick={async()=>{setBusy(true);try{const i=await api('/issues/'+Number(issue));setTask(i.task);setIssueNumber(i.number);setError('')}catch(e){setError((e as Error).message)}finally{setBusy(false)}}}>Import issue</button>
  <label htmlFor="task">Issue or task</label><textarea id="task" rows={6} value={task} onChange={e=>setTask(e.target.value)} maxLength={10000} required/>
  <button className="primary" disabled={busy||!repos.length}>{busy?'Working…':'Start run'}</button></form>

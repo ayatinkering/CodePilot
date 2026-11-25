@@ -147,8 +147,14 @@ def publish(jobs, settings, run_id, expected_base, expected_digest):
                 pr = prs[0]
             else:
                 attempt = result["attempts"][result["approved_candidate"]]
+                provenance = json.loads(run["provider_json"])
+                generation = (
+                    f"Live Gemini-generated proposal ({provenance.get('model')})."
+                    if provenance["provider"] == "gemini"
+                    else "Offline scripted proposal; not live AI."
+                )
                 body = (
-                    f"Controlled CodePilot demonstration. **Offline scripted proposal; not live AI.**\n\n"
+                    f"Controlled CodePilot demonstration. **{generation}**\n\n"
                     f"Base: `{base}`\nPatch: `{expected_digest}`\n\n"
                     f"Existing tests: {attempt['existing_tests']['status']}. "
                     f"Protected evaluator: {attempt['evaluator_tests']['status']}.\n\n"
