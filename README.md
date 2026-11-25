@@ -122,18 +122,5 @@ CODEPILOT_TEST_RUNNER_IMAGE=$(docker image inspect codepilot-runner:dev --format
 uv run --locked codepilot evaluate
 ```
 
-Two live Gemini examples passed independent Docker checks: a bug repair and a
-helper extraction. The offline suite covers 12 acceptance scenarios, including
-expected failures. These small examples are not a general repair benchmark.
 
-[Live results](docs/evidence/live-generation.json) ·
-[Offline results](evaluation/results/summary.md) ·
-[Demo guide](docs/demo-guide.md)
 
-## Current scope
-
-This is a local, single-user prototype for trusted Python examples. It does not yet
-support arbitrary repositories, public hosting or GitHub App webhooks. Structural
-analysis is approximate, and passing tests do not prove every behavior is correct.
-The frontend build and API flows are tested; a full visual browser walkthrough is
-still pending.
