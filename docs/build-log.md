@@ -77,3 +77,29 @@ Previous infrastructure commit e5c5199 pushed successfully.
 Eight meaningful patch policy tests passed. Source syntax is parsed, never executed
 on host. Candidate copies preserve protected tests and baseline. Lesson M5 and
 ADR 0006 document the actual trade-off; no full repair claim yet.
+
+## Offline MVP completion — 2026-11-25
+
+User explicitly excluded live Gemini and requested the basic remaining features.
+No live generation calls were made for this completion. The earlier model outage is
+not hidden by a fallback: the UI/API only accept labeled offline scripted runs.
+
+- `e5c5199`: real Docker boundary checks and provider JSON-schema compatibility.
+- `6512b08`: pinned real local embeddings and hybrid retrieval.
+- `587dc1f`: bounded exact edit policy and isolated candidates.
+- `cfa9079`: bounded offline workflow, independent evaluator and fixture refactoring.
+- `fa0232d`: first-parent commit/file impact analysis.
+- `5c4bb22`: local review UI/API and approved draft publication.
+
+Evidence: 51 tests passed with Docker enabled; seven real Docker tests included.
+Ruff lint/format, locked Python sync and frontend production build passed. Twelve
+scripted acceptance scenarios reached their expected states, with raw JSON/CSV
+committed under `evaluation/results`. They are not a live-model success benchmark.
+
+Controlled GitHub issue #2 was imported through the API. Run
+`f1ef680601494d13b8c52dcf91bd331d` produced the reviewed boundary edit and real draft
+PR #3 on `codex/demo-fixture`. Repeating approval returned the same PR. No merge.
+The final startup script served the dashboard and API; SSE Last-Event-ID=2 resumed
+at event 3. Visual walkthrough remains blocked by the desktop browser attachment,
+which reported an app-update/network-policy requirement. No screenshot or visual
+verification is claimed. See `docs/demo-guide.md` for the concise presentation.

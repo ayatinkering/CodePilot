@@ -1,22 +1,20 @@
-# Implementation checklist
+# Current MVP checklist
 
-Provider decision: Ayati selected Gemini API on 2026-11-25. The supplied planning
-pack is retained verbatim for context; current implementation and evidence take
-precedence over any aspirational capability description.
+Scope change: user requested completing the basic version without live Gemini.
+This is a controlled offline demonstration, not full fulfillment of the original PRD.
 
-| Milestone | Feature | Verification gate | Status |
-|---|---|---|---|
-| M0 | Bootstrap, bounded configuration, schema, health | Clean install, health, ignored secrets | Verified; pushed 7cb9d0e; CI passed |
-| M1 | Safe checkout, worker/events, restricted runner | Original unchanged, failure/timeout/cancel | Partial: local checks pass; live Docker checks blocked |
-| M2 | Tree-sitter symbols/approximate edges | Structural and malformed fixtures | Core verified/pushed 1bbeaf2; alias/cross-file linking partial |
-| M3 | Real semantic embeddings and hybrid search | Semantic query, deletion/revision invalidation | Planned |
-| M4 | Gemini typed planning | Real call, malformed output, outage | Adapter verified/pushed 87f880a; live blocked: key/model absent |
-| M5 | Structured edits and candidate isolation | Valid edit, traversal/ambiguity/preimage rejection | Planned |
-| M6 | Independent validation and bounded repair | False success rejected, no-progress stop | Planned |
-| M7 | React UI, events and artifacts | Browser end-to-end, replay/cancel/failure | Planned |
-| M8 | Issues and approved draft PRs | Real authorized PR, stale base, idempotency | Planned |
-| M9 | Commit analysis and bounded refactoring | Preservation, regression rejection, abstention | Planned |
-| M10 | Evaluation, setup, interview pack | Raw results, fresh clone, honest limitations | Planned |
+- [x] M0: configuration, schema, health and locked dependencies.
+- [x] M1 basic: immutable snapshots, persistent worker/events and real Docker runner.
+- [x] M2 basic: Tree-sitter symbols and heuristic structure.
+- [x] M3 basic: real local embeddings and hybrid retrieval.
+- [x] M4 offline: typed scripted plans; live Gemini excluded by user.
+- [x] M5 basic: bounded exact patch application with original tests protected.
+- [x] M6 basic: independent checks, bounded repair and negative cases.
+- [x] M7 implementation: review dashboard and API; production build and API tests.
+- [ ] M7 visual browser walkthrough: blocked by desktop browser attachment.
+- [x] M8 basic: real issue import and approved draft PR on isolated demo branch.
+- [x] M9 basic: commit file impact and one behavior-preserving helper extraction.
+- [x] M10 basic: 12 offline acceptance cases, raw results, setup and interview guide.
 
-Each milestone needs source, tests, lesson, ADR/evidence, a reviewed staged diff,
-a commit, push and matching remote SHA. Never merge the implementation PR automatically.
+See `docs/evidence/capabilities.md` for evidence and limitations, and `docs/build-log.md`
+for commits. Advanced/generalized features from the original PRD remain out of scope.

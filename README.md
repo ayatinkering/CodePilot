@@ -1,98 +1,96 @@
 # CodePilot
 
-An AI-assisted Python maintenance research prototype, started 25 November 2026.
-**In development: foundation, partial worker and structural indexing. No issue-to-patch or live-model success claimed.**
-Gemini is the selected generation provider. There is no model training or fine-tuning.
+A local, AI-assisted software-maintenance research prototype. **This MVP uses
+scripted proposals on controlled Python fixtures; it does not claim live AI repair.**
+Parsing, local embeddings, hybrid retrieval, Docker validation, the review API/UI,
+GitHub issue import, and approved draft PR publication are implemented.
 
-## Run the foundation
+## Start the demo
 
-Prerequisites: Git, Python 3.12, [uv](https://docs.astral.sh/uv/).
+Requirements: Linux, Git, Python 3.12, uv, Node.js 22.12+, and running Docker
+Engine/Desktop. GitHub CLI authentication is only needed for issue/PR operations.
+Initial installation/model/image preparation needs network access; offline runs do not.
 
 ```sh
 git clone --branch codex/codepilot-build https://github.com/ayatinkering/CodePilot.git
 cd CodePilot
 uv sync --locked
-uv run --locked codepilot health
-uv run --locked codepilot serve
+npm ci --prefix frontend
+npm run build --prefix frontend
+uv run --locked codepilot prepare-model
+docker build -t codepilot-runner:dev runner
+# Copy only on first setup; do not overwrite an existing .env.
+cp -n .env.example .env
+docker image inspect codepilot-runner:dev --format '{{.Id}}'
 ```
 
-Open http://127.0.0.1:8000/docs for the API; GET `/api/health` checks database access.
-There is no React UI yet. GitHub hosts the source; it is not a deployed application.
+Put the printed `sha256:...` value after `CODEPILOT_RUNNER_IMAGE=` in `.env`.
+No Gemini or OpenAI key is required. Then run:
 
 ```sh
-uv run --locked pytest -q
+./scripts/start-demo.sh
+```
+
+Open [CodePilot locally](http://127.0.0.1:8000). Keep the terminal open; Ctrl-C stops
+both processes. The startup script prepares five trusted Git fixture repositories.
+Select **boundary**, keep **Offline scripted demo**, and click **Start run**. After
+validation, inspect **Diff**, **Checks**, **Plan**, and **Source**. Select **refactor**
+for the extract-helper example. The remaining targets demonstrate failures.
+Task text changes retrieval, but the offline proposal remains a fixed fixture script.
+
+If port 8000 or the worker lock is occupied, stop the previous CodePilot process.
+Do not run the evaluation command while the worker is running. An interrupted run
+is recorded on worker restart; retry creates a new run at the same base commit.
+
+## GitHub demonstration
+
+The implementation is on `codex/codepilot-build`, with [draft implementation PR #1](https://github.com/ayatinkering/CodePilot/pull/1).
+A separate `codex/demo-fixture` branch contains only the synthetic discount target.
+[Controlled issue #2](https://github.com/ayatinkering/CodePilot/issues/2) can be imported
+using the dashboard's issue-number field. The local operator has opted this fixture
+into publication; a new installation defaults to publication disabled.
+
+For another installation, explicitly bind the registered boundary fixture in ignored
+`.codepilot/repositories.json`: `publication_allowed: true`, `github_repo:
+"ayatinkering/CodePilot"`, `base_branch: "codex/demo-fixture"`. The local fixture's
+base SHA must equal that remote branch. A fresh generated fixture has a different
+commit SHA: clone the dedicated branch into a new trusted target directory and set
+that registry entry's absolute `path` to the clone. Do not repoint it to main.
+Authentication stays in the host `gh` configuration, never in target containers.
+
+Review the exact patch and evidence, check the approval box, then create a **draft**
+PR. Changed bases or modified candidates are rejected. Ambiguous publication can be
+reconciled by approving the same digest again. No force push or automatic merge.
+
+## Verify
+
+```sh
 uv run --locked ruff check .
 uv run --locked ruff format --check .
+uv run --locked pytest -q
+CODEPILOT_TEST_RUNNER_IMAGE=$(docker image inspect codepilot-runner:dev --format '{{.Id}}') \
+  uv run --locked pytest -q
+# Stop the worker first:
+uv run --locked codepilot evaluate
 ```
 
-Configuration: copy `.env.example` to ignored `.env` if needed. `CODEPILOT_DATA_DIR`
-chooses local storage (default `.codepilot`); `CODEPILOT_PROVIDER` is `gemini` or
-`offline`; `CODEPILOT_MODEL` will identify an explicitly chosen available model.
-`GEMINI_API_KEY` is reserved for backend-only live calls. Obtain keys through
-[Google AI Studio](https://aistudio.google.com/apikey); enter them locally, never in
-chat, tracked files, frontend code, logs, or target containers. No key is needed
-for foundation tests. Gemini planning adapter exists; live access remains unverified. There is no automatic model selection.
+The evaluation records **12 scripted acceptance scenarios over two synthetic source
+fixtures**, including expected rejections. It is not an LLM benchmark, and the A/B/C
+retrieval cases do not establish quality improvements because generation is fixed.
+See [raw results and summary](evaluation/results/summary.md),
+[capability ledger](docs/evidence/capabilities.md), and [demo/interview guide](docs/demo-guide.md).
 
-Docker Engine/Desktop must be running before target validation can be implemented
-and verified. No host execution fallback is permitted. Initial targets will be
-explicitly trusted, allowlisted Python repositories with vetted pytest dependencies.
-The local backend is not a public arbitrary-code execution service. Bind to loopback.
-A future mutation API must require local authentication and origin checks.
+## Boundaries
 
-Troubleshooting: `codepilot health` requires a writable data directory. A newer
-schema is rejected; do not delete real data to downgrade. `uv sync --locked` fails
-on stale dependency declarations; update the lock deliberately. A Docker socket
-error means the daemon/context needs attention, not that tests passed.
+Local single-user, trusted Python fixtures only. No arbitrary repository execution,
+remote GitHub App/webhooks, public hosting, automatic merging, model training, or
+live Gemini verification. Live generation is excluded from the MVP at the user's
+request; its experimental adapter remains in source, while the UI/API accept offline
+runs only. Tree-sitter edges and smell metrics are approximate. Test success is not
+proof of correctness. Browser visual verification remains pending due to the desktop
+app's unavailable browser attachment; API flows and frontend compilation are tested.
 
-See [checklist](docs/planning/checklist.md), [capability evidence](docs/evidence/capabilities.md),
-[lessons](docs/lessons/M0-foundation.md), and [build log](docs/build-log.md).
-Dependencies are locked in `uv.lock`; no project license has been selected yet.
-GitHub App webhooks, live PR automation, semantic retrieval, and evaluation are planned.
-
-## Partial M1: queue and worker
-
-The worker stops after baseline; a passing baseline currently abstains with
-`pipeline_not_implemented_after_baseline`. Container execution is unverified.
-
-```sh
-# Operator-controlled allowlist, not inferred from an issue or repository README.
-export CODEPILOT_ALLOWED_REPOS=/absolute/path/to/trusted/python/repository
-# Separate operator preparation (requires running Docker):
-docker build -t codepilot-runner:dev runner
-export CODEPILOT_RUNNER_IMAGE=$(docker image inspect codepilot-runner:dev --format '{{.Id}}')
-uv run --locked codepilot submit /absolute/path/to/trusted/python/repository 'Describe the issue'
-uv run --locked codepilot worker
-# In another terminal, using the run ID printed by submit:
-uv run --locked codepilot status RUN_ID
-uv run --locked codepilot cancel RUN_ID
-```
-
-Linux worker only (`flock`). Stop with Ctrl-C; next startup marks active work
-interrupted. Retry and remote acquisition are not implemented. Snapshots/reports
-under `.codepilot/runs` may contain repository source: keep them local. Image build
-requires network; execution never installs target dependencies. Docker access is
-privileged; never expose this worker publicly or mount the socket into target code.
-
-## Structural inspection
-
-After a worker has acquired a run snapshot (even if baseline fails due to unavailable
-Docker), `uv run --locked codepilot index RUN_ID` prints and saves a real Tree-sitter
-index in that run's directory. This debug inspection does not bypass the baseline
-gate or mark the run validated. Symbols, ranges, parse errors, advisory metrics and
-heuristic/unresolved call references are inspectable; cross-file import resolution
-and semantic retrieval are not implemented yet.
-
-## Gemini planning smoke check (partial M4)
-
-Configure `GEMINI_API_KEY` and an available exact `CODEPILOT_MODEL` locally in
-ignored `.env`. Do not paste keys into chat. Then:
-
-```sh
-uv run --locked codepilot plan-smoke
-# Explicit test fixture; this is not a live model:
-CODEPILOT_PROVIDER=offline uv run --locked codepilot plan-smoke
-```
-
-Live smoke sends only a small synthetic boundary-condition task. It may incur
-provider usage. A missing key/model fails visibly; it never silently selects the
-fake provider. The adapter is not yet wired into the worker repair pipeline.
+The runner uses a pinned image, read-only source/root, non-root user, no network,
+limited resources, and no host secrets or Docker socket. Docker itself is privileged;
+keep the control plane on loopback. Runtime source, reports, database and `.env` stay
+under ignored local paths. Dependencies are locked; no project license is selected.

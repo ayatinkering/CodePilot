@@ -12,7 +12,15 @@ from codepilot.storage import Store
 def main():
     parser = argparse.ArgumentParser(description="CodePilot local control plane")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ["health", "serve", "worker", "plan-smoke", "prepare-model"]:
+    for name in [
+        "health",
+        "serve",
+        "worker",
+        "plan-smoke",
+        "prepare-model",
+        "prepare-demo",
+        "evaluate",
+    ]:
         commands.add_parser(name)
     submit = commands.add_parser("submit")
     submit.add_argument("repository", type=Path)
@@ -22,6 +30,19 @@ def main():
         command.add_argument("run_id")
     args = parser.parse_args()
     settings = Settings()
+    if args.command == "evaluate":
+        from codepilot.evaluate import evaluate
+
+        report = evaluate(settings, Path("evaluation/results"))
+        print(f"{report['passed']}/{report['total']} expected outcomes")
+        if report["passed"] != report["total"]:
+            parser.exit(1, "Acceptance checks failed; inspect evaluation/results/results.json\n")
+        return
+    if args.command == "prepare-demo":
+        from codepilot.demo import prepare_demo
+
+        print(json.dumps(prepare_demo(settings.data_dir), indent=2))
+        return
     if args.command == "prepare-model":
         from codepilot.retrieval import prepare_model
 
