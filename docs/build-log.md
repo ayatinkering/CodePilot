@@ -66,3 +66,9 @@ Fixed read-only source staging, Desktop host-path visibility and logging setup.
 Pinned runner base digest/dependencies. Work paused at user request before commit;
 resumed for basic MVP spanning M0–M10. Main project folder now holds the build
 branch; temporary worktree disappeared, and no secrets were committed.
+
+## M3 basic retrieval, 2026-11-25
+Pinned BGE-small ONNX model downloaded; actual CPU semantic/cache/deletion checks
+passed. Combined new retrieval and patch tests: 9 passed in 0.85s. Semantic retrieval
+is implemented, not a token-hash stand-in. See M3 lesson and ADR 0005.
+Previous infrastructure commit e5c5199 pushed successfully.

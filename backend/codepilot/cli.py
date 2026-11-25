@@ -12,7 +12,7 @@ from codepilot.storage import Store
 def main():
     parser = argparse.ArgumentParser(description="CodePilot local control plane")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ["health", "serve", "worker", "plan-smoke"]:
+    for name in ["health", "serve", "worker", "plan-smoke", "prepare-model"]:
         commands.add_parser(name)
     submit = commands.add_parser("submit")
     submit.add_argument("repository", type=Path)
@@ -22,6 +22,11 @@ def main():
         command.add_argument("run_id")
     args = parser.parse_args()
     settings = Settings()
+    if args.command == "prepare-model":
+        from codepilot.retrieval import prepare_model
+
+        print(prepare_model(settings.data_dir))
+        return
     if args.command == "plan-smoke":
         from codepilot.providers import (
             Evidence,
