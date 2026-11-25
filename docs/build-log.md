@@ -44,3 +44,16 @@ Offline abstention and real missing-key failure observed; no live generation.
 See evidence/M4-verification.md and lessons/M4-gemini-planning.md.
 Dependency-independent work proceeded while Docker/key remained unavailable.
 Commit reference: introducing commit; push pending at creation.
+
+M4 adapter remote confirmed: `87f880a84f928fa9bcc3c61f94be2c4225494ac7`.
+CI passed for that exact commit:
+https://github.com/ayatinkering/CodePilot/actions/runs/45569020456
+M2 core CI also passed:
+https://github.com/ayatinkering/CodePilot/actions/runs/45568516227
+Final backend run: 28 passed in 0.84s; lint/format passed; working tree clean after
+checkpoint push. Live Gemini/model and Docker checks still blocked. M3 and M5–M10
+remain planned, not complete. No remote deployment or product PR was created.
+
+PR editing hit an installed-gh GraphQL Projects-classic deprecation; used the
+GitHub REST PR update endpoint instead. This is a development tooling failure,
+not a product test failure. No merge performed.
