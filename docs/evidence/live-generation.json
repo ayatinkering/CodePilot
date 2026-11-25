@@ -1,0 +1,567 @@
+{
+  "scope": "Two real Gemini-generated controlled fixture runs; not a general quality benchmark",
+  "model": "gemini-3.5-flash",
+  "live": true,
+  "successful_runs": 2,
+  "generation_calls": 4,
+  "reported_tokens": 7236,
+  "probe_notes": [
+    "gemini-3.1-flash-lite: service unavailable",
+    "gemini-3.8-flash: service unavailable",
+    "gemini-3.5-flash: structured planning succeeded before these runs"
+  ],
+  "cases": [
+    {
+      "case": "boundary",
+      "run_id": "b6432691a6a843d29c9e0e17f0797a0f",
+      "state": "published",
+      "result": {
+        "run_id": "b6432691a6a843d29c9e0e17f0797a0f",
+        "mode": "repair",
+        "provider": {
+          "calls": 2,
+          "tokens": 3150,
+          "mode": "gemini",
+          "model": "gemini-3.5-flash",
+          "usage_known": true
+        },
+        "attempts": [
+          {
+            "attempt": 0,
+            "proposal": {
+              "decision": "propose",
+              "rationale": "Update the boundary condition in src/discounts.py from `age > 18` to `age >= 18` so that customers aged 18 qualify for the discount.",
+              "edits": [
+                {
+                  "path": "src/discounts.py",
+                  "expected_sha256": "52b60764c9cc2f4622d2719f3885d895b15eae5d967235a307e358f1f7cfbaf1",
+                  "old": "def eligible(age):\n    \"\"\"Customers aged 18 and above qualify for the student discount.\"\"\"\n    return age > 18\n",
+                  "new": "def eligible(age):\n    \"\"\"Customers aged 18 and above qualify for the student discount.\"\"\"\n    return age >= 18\n"
+                }
+              ],
+              "generated_test": "from src.discounts import eligible\n\ndef test_eligible_boundary_18():\n    assert eligible(18) is True\n"
+            },
+            "patch": {
+              "diff": "--- a/src/discounts.py\n+++ b/src/discounts.py\n@@ -1,3 +1,3 @@\n def eligible(age):\n     \"\"\"Customers aged 18 and above qualify for the student discount.\"\"\"\n-    return age > 18\n+    return age >= 18\n",
+              "patch_digest": "61713344563dc95790db0493b1b7600c190d6d05767353ce6df14789138bcc2d",
+              "files": [
+                "src/discounts.py"
+              ],
+              "changed_lines": 2
+            },
+            "existing_tests": {
+              "status": "passed",
+              "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+              "exit_code": 0,
+              "report": {
+                "tests": [
+                  {
+                    "id": "test_discounts.py::test_existing_examples",
+                    "outcome": "passed"
+                  }
+                ],
+                "collection_errors": []
+              },
+              "duration_seconds": 1.2732681520001279
+            },
+            "evaluator_tests": {
+              "status": "passed",
+              "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+              "exit_code": 0,
+              "report": {
+                "tests": [
+                  {
+                    "id": "test_codepilot_check.py::test_exact_boundary_and_neighbors",
+                    "outcome": "passed"
+                  },
+                  {
+                    "id": "test_discounts.py::test_existing_examples",
+                    "outcome": "passed"
+                  }
+                ],
+                "collection_errors": []
+              },
+              "duration_seconds": 1.4022521839997353
+            },
+            "generated_tests": {
+              "baseline": {
+                "status": "baseline_failed",
+                "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+                "exit_code": 1,
+                "report": {
+                  "tests": [
+                    {
+                      "id": "test_codepilot_check.py::test_eligible_boundary_18",
+                      "outcome": "failed"
+                    },
+                    {
+                      "id": "test_discounts.py::test_existing_examples",
+                      "outcome": "passed"
+                    }
+                  ],
+                  "collection_errors": []
+                },
+                "duration_seconds": 1.326328480000484
+              },
+              "candidate": {
+                "status": "passed",
+                "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+                "exit_code": 0,
+                "report": {
+                  "tests": [
+                    {
+                      "id": "test_codepilot_check.py::test_eligible_boundary_18",
+                      "outcome": "passed"
+                    },
+                    {
+                      "id": "test_discounts.py::test_existing_examples",
+                      "outcome": "passed"
+                    }
+                  ],
+                  "collection_errors": []
+                },
+                "duration_seconds": 1.382417792000524
+              },
+              "reproduces_issue": true
+            },
+            "findings_after": [],
+            "failure": null
+          }
+        ],
+        "base_sha": "1625f43e04bf6913461dc2c895af85671a53c472",
+        "commit_analysis": {
+          "base_sha": "1625f43e04bf6913461dc2c895af85671a53c472",
+          "parent_sha": null,
+          "comparison": "empty tree",
+          "changed_files": [
+            "src/discounts.py",
+            "tests/test_discounts.py"
+          ],
+          "affected_symbols": [
+            {
+              "path": "src/discounts.py",
+              "symbol": "src.discounts.eligible",
+              "start_line": 1,
+              "end_line": 3
+            },
+            {
+              "path": "tests/test_discounts.py",
+              "symbol": "tests.test_discounts.test_existing_examples",
+              "start_line": 4,
+              "end_line": 6
+            }
+          ],
+          "limitation": "Conservative file-level impact, not semantic change or dependency proof."
+        },
+        "findings_before": [],
+        "context": [
+          {
+            "id": "src/discounts.py:1-3",
+            "path": "src/discounts.py",
+            "symbol": "src.discounts.eligible",
+            "start_line": 1,
+            "end_line": 3,
+            "text": "def eligible(age):\n    \"\"\"Customers aged 18 and above qualify for the student discount.\"\"\"\n    return age > 18\n",
+            "sha256": "52b60764c9cc2f4622d2719f3885d895b15eae5d967235a307e358f1f7cfbaf1",
+            "score": 0.03278688524590164,
+            "channels": [
+              {
+                "name": "lexical",
+                "rank": 1,
+                "value": 9.0
+              },
+              {
+                "name": "semantic",
+                "rank": 1,
+                "value": 0.7684392084324019
+              }
+            ]
+          },
+          {
+            "id": "tests/test_discounts.py:4-6",
+            "path": "tests/test_discounts.py",
+            "symbol": "tests.test_discounts.test_existing_examples",
+            "start_line": 4,
+            "end_line": 6,
+            "text": "def test_existing_examples():\n    assert eligible(19) is True\n    assert eligible(17) is False\n",
+            "sha256": "285efca2fc15b0e80dbb3d5f365009247667b70886cdcb00779be20f9c3a250e",
+            "score": 0.016129032258064516,
+            "channels": [
+              {
+                "name": "semantic",
+                "rank": 2,
+                "value": 0.6577528507249949
+              }
+            ]
+          }
+        ],
+        "embedding_model": "Qdrant/bge-small-en-v1.5-onnx-Q@c32e6154d1bb7a0e47c5e745fd895e7700f44385:384:normalized",
+        "duration_seconds": 46.754,
+        "plan": {
+          "decision": "propose",
+          "rationale": "The condition in `src/discounts.py` checks `age > 18`, which excludes customers who are exactly 18 years old. Updating the comparison to `age >= 18` fixes the boundary condition so that customers aged 18 and above qualify for the discount.",
+          "steps": [
+            "Update `src/discounts.py` to change `return age > 18` to `return age >= 18`."
+          ],
+          "evidence_ids": [
+            "src/discounts.py:1-3",
+            "tests/test_discounts.py:4-6"
+          ],
+          "proposed_files": [
+            "src/discounts.py"
+          ],
+          "acceptance_criteria": [
+            "Calling `eligible(18)` returns `True`.",
+            "Existing test cases for ages 17 (`False`) and 19 (`True`) continue to pass."
+          ],
+          "risks": [
+            "Existing code or downstream callers expecting 18-year-olds to be excluded will now evaluate them as eligible."
+          ]
+        },
+        "evaluator_baseline": {
+          "status": "baseline_failed",
+          "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+          "exit_code": 1,
+          "report": {
+            "tests": [
+              {
+                "id": "test_codepilot_check.py::test_exact_boundary_and_neighbors",
+                "outcome": "failed"
+              },
+              {
+                "id": "test_discounts.py::test_existing_examples",
+                "outcome": "passed"
+              }
+            ],
+            "collection_errors": []
+          },
+          "duration_seconds": 1.3988737560002846
+        },
+        "approved_candidate": 0,
+        "patch_digest": "61713344563dc95790db0493b1b7600c190d6d05767353ce6df14789138bcc2d",
+        "validation": "ready_for_review"
+      },
+      "baseline": {
+        "status": "passed",
+        "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+        "exit_code": 0,
+        "report": {
+          "tests": [
+            {
+              "id": "test_discounts.py::test_existing_examples",
+              "outcome": "passed"
+            }
+          ],
+          "collection_errors": []
+        },
+        "duration_seconds": 1.5014752810002392
+      },
+      "publication": {
+        "url": "https://github.com/ayatinkering/CodePilot/pull/4",
+        "number": 4,
+        "base_sha": "1625f43e04bf6913461dc2c895af85671a53c472",
+        "patch_digest": "61713344563dc95790db0493b1b7600c190d6d05767353ce6df14789138bcc2d"
+      }
+    },
+    {
+      "case": "refactor",
+      "run_id": "c19c00b2801749d882a65da202514523",
+      "state": "ready_for_review",
+      "result": {
+        "run_id": "c19c00b2801749d882a65da202514523",
+        "mode": "refactor",
+        "provider": {
+          "calls": 2,
+          "tokens": 4086,
+          "mode": "gemini",
+          "model": "gemini-3.5-flash",
+          "usage_known": true
+        },
+        "attempts": [
+          {
+            "attempt": 0,
+            "proposal": {
+              "decision": "propose",
+              "rationale": "Extract the line total calculation into a helper function `calculate_line_total` in `src/orders.py`, handling positive quantities while returning 0 for non-positive quantities. Update `total_order` to delegate to this helper function.",
+              "edits": [
+                {
+                  "path": "src/orders.py",
+                  "expected_sha256": "b77b76e709702931607916bfefcf770b411e8af3cb7f609eedfc7fbf6b0aff89",
+                  "old": "def total_order(items):\n    \"\"\"Sum positive line totals; ignore zero or negative quantities.\"\"\"\n    total = 0\n    for price, quantity in items:\n        if quantity > 0:\n            total += price * quantity\n    return total",
+                  "new": "def calculate_line_total(price, quantity):\n    \"\"\"Calculate line total for positive quantities, returning 0 otherwise.\"\"\"\n    if quantity > 0:\n        return price * quantity\n    return 0\n\n\ndef total_order(items):\n    \"\"\"Sum positive line totals; ignore zero or negative quantities.\"\"\"\n    total = 0\n    for price, quantity in items:\n        total += calculate_line_total(price, quantity)\n    return total"
+                }
+              ],
+              "generated_test": "from src.orders import total_order, calculate_line_total\n\ndef test_calculate_line_total():\n    assert calculate_line_total(10, 2) == 20\n    assert calculate_line_total(10, 0) == 0\n    assert calculate_line_total(10, -5) == 0\n    assert total_order([(10, 2), (5, -1), (4, 0)]) == 20\n"
+            },
+            "patch": {
+              "diff": "--- a/src/orders.py\n+++ b/src/orders.py\n@@ -1,7 +1,13 @@\n+def calculate_line_total(price, quantity):\n+    \"\"\"Calculate line total for positive quantities, returning 0 otherwise.\"\"\"\n+    if quantity > 0:\n+        return price * quantity\n+    return 0\n+\n+\n def total_order(items):\n     \"\"\"Sum positive line totals; ignore zero or negative quantities.\"\"\"\n     total = 0\n     for price, quantity in items:\n-        if quantity > 0:\n-            total += price * quantity\n+        total += calculate_line_total(price, quantity)\n     return total\n",
+              "patch_digest": "f3d33dd06b20f05fb1092d8cd1beec9098871a66d85767037abbaa4ee7859273",
+              "files": [
+                "src/orders.py"
+              ],
+              "changed_lines": 10
+            },
+            "existing_tests": {
+              "status": "passed",
+              "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+              "exit_code": 0,
+              "report": {
+                "tests": [
+                  {
+                    "id": "test_orders.py::test_existing_order",
+                    "outcome": "passed"
+                  }
+                ],
+                "collection_errors": []
+              },
+              "duration_seconds": 1.4001351770002657
+            },
+            "evaluator_tests": {
+              "status": "passed",
+              "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+              "exit_code": 0,
+              "report": {
+                "tests": [
+                  {
+                    "id": "test_codepilot_check.py::test_behavior_preservation",
+                    "outcome": "passed"
+                  },
+                  {
+                    "id": "test_orders.py::test_existing_order",
+                    "outcome": "passed"
+                  }
+                ],
+                "collection_errors": []
+              },
+              "duration_seconds": 1.4181956899992656
+            },
+            "generated_tests": {
+              "baseline": {
+                "status": "environment_error",
+                "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+                "exit_code": 2,
+                "report": {
+                  "tests": [],
+                  "collection_errors": [
+                    "test_codepilot_check.py"
+                  ]
+                },
+                "duration_seconds": 1.4778074159994503
+              },
+              "candidate": {
+                "status": "passed",
+                "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+                "exit_code": 0,
+                "report": {
+                  "tests": [
+                    {
+                      "id": "test_codepilot_check.py::test_calculate_line_total",
+                      "outcome": "passed"
+                    },
+                    {
+                      "id": "test_orders.py::test_existing_order",
+                      "outcome": "passed"
+                    }
+                  ],
+                  "collection_errors": []
+                },
+                "duration_seconds": 1.4764031539998541
+              },
+              "reproduces_issue": false
+            },
+            "findings_after": [
+              {
+                "symbol": "src.orders.calculate_line_total",
+                "path": "src/orders.py",
+                "start_line": 1,
+                "end_line": 5,
+                "metric": "lines",
+                "value": 5,
+                "threshold": 4
+              },
+              {
+                "symbol": "src.orders.total_order",
+                "path": "src/orders.py",
+                "start_line": 8,
+                "end_line": 13,
+                "metric": "lines",
+                "value": 6,
+                "threshold": 4
+              }
+            ],
+            "target_metric": {
+              "function": "total_order",
+              "before_lines": 7,
+              "after_lines": 6
+            },
+            "failure": null
+          }
+        ],
+        "base_sha": "22363f8a9622820fed317af2a34ec346bb010c90",
+        "commit_analysis": {
+          "base_sha": "22363f8a9622820fed317af2a34ec346bb010c90",
+          "parent_sha": null,
+          "comparison": "empty tree",
+          "changed_files": [
+            "src/orders.py",
+            "tests/test_orders.py"
+          ],
+          "affected_symbols": [
+            {
+              "path": "src/orders.py",
+              "symbol": "src.orders.total_order",
+              "start_line": 1,
+              "end_line": 7
+            },
+            {
+              "path": "tests/test_orders.py",
+              "symbol": "tests.test_orders.test_existing_order",
+              "start_line": 4,
+              "end_line": 5
+            }
+          ],
+          "limitation": "Conservative file-level impact, not semantic change or dependency proof."
+        },
+        "findings_before": [
+          {
+            "symbol": "src.orders.total_order",
+            "path": "src/orders.py",
+            "start_line": 1,
+            "end_line": 7,
+            "metric": "branch_heuristic",
+            "value": 3,
+            "threshold": 2
+          },
+          {
+            "symbol": "src.orders.total_order",
+            "path": "src/orders.py",
+            "start_line": 1,
+            "end_line": 7,
+            "metric": "nesting",
+            "value": 2,
+            "threshold": 1
+          },
+          {
+            "symbol": "src.orders.total_order",
+            "path": "src/orders.py",
+            "start_line": 1,
+            "end_line": 7,
+            "metric": "lines",
+            "value": 7,
+            "threshold": 4
+          }
+        ],
+        "context": [
+          {
+            "id": "src/orders.py:1-7",
+            "path": "src/orders.py",
+            "symbol": "src.orders.total_order",
+            "start_line": 1,
+            "end_line": 7,
+            "text": "def total_order(items):\n    \"\"\"Sum positive line totals; ignore zero or negative quantities.\"\"\"\n    total = 0\n    for price, quantity in items:\n        if quantity > 0:\n            total += price * quantity\n    return total\n",
+            "sha256": "b77b76e709702931607916bfefcf770b411e8af3cb7f609eedfc7fbf6b0aff89",
+            "score": 0.03278688524590164,
+            "channels": [
+              {
+                "name": "lexical",
+                "rank": 1,
+                "value": 6.0
+              },
+              {
+                "name": "semantic",
+                "rank": 1,
+                "value": 0.8099905570742748
+              }
+            ]
+          },
+          {
+            "id": "tests/test_orders.py:4-5",
+            "path": "tests/test_orders.py",
+            "symbol": "tests.test_orders.test_existing_order",
+            "start_line": 4,
+            "end_line": 5,
+            "text": "def test_existing_order():\n    assert total_order([(10, 2), (3, 0)]) == 20\n",
+            "sha256": "56d1ae085eea6ae10245999a4670a322c7db8ec1535b4c30e36754d3852d1735",
+            "score": 0.03225806451612903,
+            "channels": [
+              {
+                "name": "lexical",
+                "rank": 2,
+                "value": 1.0
+              },
+              {
+                "name": "semantic",
+                "rank": 2,
+                "value": 0.6909216860224534
+              }
+            ]
+          }
+        ],
+        "embedding_model": "Qdrant/bge-small-en-v1.5-onnx-Q@c32e6154d1bb7a0e47c5e745fd895e7700f44385:384:normalized",
+        "duration_seconds": 72.409,
+        "plan": {
+          "decision": "propose",
+          "rationale": "Extract the line calculation for positive quantities in total_order into a helper function inside src/orders.py, maintaining exact behavior for all prices and non-positive quantities.",
+          "steps": [
+            "Define a helper function in src/orders.py to compute line totals for positive quantities.",
+            "Update total_order in src/orders.py to delegate line calculation to the helper.",
+            "Run test_orders.py to verify that existing order total calculations remain unchanged."
+          ],
+          "evidence_ids": [
+            "src/orders.py:1-7",
+            "tests/test_orders.py:4-5"
+          ],
+          "proposed_files": [
+            "src/orders.py"
+          ],
+          "acceptance_criteria": [
+            "src/orders.py contains a helper function for line total calculation.",
+            "total_order calls the helper function and returns correct totals.",
+            "Zero and negative quantities contribute 0 to the overall total as before.",
+            "Existing tests in tests/test_orders.py pass without modification."
+          ],
+          "risks": [
+            "Incorrect handling of zero or negative quantities in the helper could alter total_order outputs."
+          ]
+        },
+        "evaluator_baseline": {
+          "status": "passed",
+          "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+          "exit_code": 0,
+          "report": {
+            "tests": [
+              {
+                "id": "test_codepilot_check.py::test_behavior_preservation",
+                "outcome": "passed"
+              },
+              {
+                "id": "test_orders.py::test_existing_order",
+                "outcome": "passed"
+              }
+            ],
+            "collection_errors": []
+          },
+          "duration_seconds": 1.3624771879995023
+        },
+        "approved_candidate": 0,
+        "patch_digest": "f3d33dd06b20f05fb1092d8cd1beec9098871a66d85767037abbaa4ee7859273",
+        "validation": "ready_for_review"
+      },
+      "baseline": {
+        "status": "passed",
+        "image": "sha256:c6683428982dd4c151cfce1813af24f4a644350fafd1cac801e9090ddbc9f067",
+        "exit_code": 0,
+        "report": {
+          "tests": [
+            {
+              "id": "test_orders.py::test_existing_order",
+              "outcome": "passed"
+            }
+          ],
+          "collection_errors": []
+        },
+        "duration_seconds": 1.3171642260003864
+      }
+    }
+  ]
+}

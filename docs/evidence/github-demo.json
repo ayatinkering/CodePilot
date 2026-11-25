@@ -1,0 +1,12 @@
+{
+  "run_id": "f1ef680601494d13b8c52dcf91bd331d",
+  "issue_url": "https://github.com/ayatinkering/CodePilot/issues/2",
+  "publication": {
+    "url": "https://github.com/ayatinkering/CodePilot/pull/3",
+    "number": 3,
+    "base_sha": "1625f43e04bf6913461dc2c895af85671a53c472",
+    "patch_digest": "61713344563dc95790db0493b1b7600c190d6d05767353ce6df14789138bcc2d"
+  },
+  "idempotent_repeat": true,
+  "provider": "offline scripted demo"
+}

@@ -1,0 +1,13 @@
+case,run_id,base_sha,variant,expected,actual,passed,reason,attempts,seconds,generation_tokens
+repair-A,b3349f31a682481096d386199538f6f2,1625f43e04bf6913461dc2c895af85671a53c472,A,ready_for_review,ready_for_review,True,,1,9.767,0
+repair-B,fe09661d3be5472cbc06c55bce18aecc,1625f43e04bf6913461dc2c895af85671a53c472,B,ready_for_review,ready_for_review,True,,1,9.237,0
+repair-C,a8286859fc2e41c7944f2f99024ea68b,1625f43e04bf6913461dc2c895af85671a53c472,C,ready_for_review,ready_for_review,True,,1,8.812,0
+repair-second,98b47db561a14bfbb040e6e21f17d5bb,1625f43e04bf6913461dc2c895af85671a53c472,C,ready_for_review,ready_for_review,True,,2,15.034,0
+repair-wrong,d653d4de5abf472eb7633fe3fbc3f8af,1625f43e04bf6913461dc2c895af85671a53c472,C,abstained,abstained,True,repeated_candidate_no_progress,1,9.014,0
+repair-illegal,9f5a6ae5cdf2442db1264df0578a6ced,1625f43e04bf6913461dc2c895af85671a53c472,C,abstained,abstained,True,repeated_candidate_no_progress,1,3.496,0
+repair-unsupported,d8797a7d6ce940169073960c521dc332,1625f43e04bf6913461dc2c895af85671a53c472,C,abstained,abstained,True,model_abstained,0,3.337,0
+refactor-preserved,001ac72165db4238ac0bca57a76e3f87,22363f8a9622820fed317af2a34ec346bb010c90,C,ready_for_review,ready_for_review,True,,1,9.393,0
+refactor-regression,94c37d7931974b9680aa898509ee4ffb,22363f8a9622820fed317af2a34ec346bb010c90,C,abstained,abstained,True,repeated_candidate_no_progress,1,9.239,0
+original-failure,9cc4e70243d4439c98073ec2c2080508,2f7d4e76d5c0c2f0fbb42ac2c043babef7a7a450,C,failed,failed,True,baseline_failed,0,1.563,0
+missing-dependency,f7ca115b4b4544c796a9dc1502ca521f,7c33b5234e1726c7afb3d584736819a3ab45c9eb,C,failed,failed,True,environment_error,0,1.605,0
+zero-tests,d0c8b4df18dc467487d3321a5b431923,8b290b183334b177cc08ce52787117f34080e109,C,failed,failed,True,zero_tests,0,1.612,0

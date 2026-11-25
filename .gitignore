@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.codepilot/
+*.sqlite*
+node_modules/
+dist/
+coverage/
+*.pem
+*.key
+
+*.tsbuildinfo
