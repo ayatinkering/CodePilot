@@ -18,6 +18,7 @@ def test_health_survives_restart(tmp_path):
                 "schema_version": 1,
                 "release": "foundation",
             }
+            client.post("/api/session", headers={"origin": "http://testserver"})
             assert client.get("/api/capabilities").json()["live_generation_verified"] is False
             assert client.get("/api/health", headers={"host": "evil.example"}).status_code == 400
 

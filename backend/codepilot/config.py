@@ -24,7 +24,7 @@ class Budgets(BaseModel):
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="CODEPILOT_", env_file=".env", extra="ignore")
     data_dir: Path = Path(".codepilot")
-    provider: Literal["gemini", "offline"] = "gemini"
+    provider: Literal["gemini", "offline"] = "offline"
     model: str = ""
     runner_image: str = ""
     github_repo: str = "ayatinkering/CodePilot"

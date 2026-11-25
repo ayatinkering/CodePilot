@@ -13,3 +13,5 @@ dist/
 coverage/
 *.pem
 *.key
+
+*.tsbuildinfo
