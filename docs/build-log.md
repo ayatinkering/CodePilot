@@ -72,3 +72,8 @@ Pinned BGE-small ONNX model downloaded; actual CPU semantic/cache/deletion check
 passed. Combined new retrieval and patch tests: 9 passed in 0.85s. Semantic retrieval
 is implemented, not a token-hash stand-in. See M3 lesson and ADR 0005.
 Previous infrastructure commit e5c5199 pushed successfully.
+
+## M5 exact edits, 2026-11-25
+Eight meaningful patch policy tests passed. Source syntax is parsed, never executed
+on host. Candidate copies preserve protected tests and baseline. Lesson M5 and
+ADR 0006 document the actual trade-off; no full repair claim yet.
