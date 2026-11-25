@@ -5,6 +5,7 @@ import json
 import shutil
 import time
 
+from codepilot.analysis import analyze_commit
 from codepilot.config import Budgets
 from codepilot.demo import ROOT, registry
 from codepilot.indexing import findings, index_snapshot, parse_source
@@ -116,6 +117,7 @@ def execute_pipeline(jobs, settings, run_id, directory, manifest, image):
         jobs.transition(run_id, "indexing")
         index = index_snapshot(baseline, manifest)
         (directory / "index.json").write_text(json.dumps(index, indent=2))
+        result["commit_analysis"] = analyze_commit(task["repository"], run["base_sha"], index)
         result["findings_before"] = findings(
             index, {"lines": 4, "nesting": 1, "parameters": 5, "branch_heuristic": 2}
         )
