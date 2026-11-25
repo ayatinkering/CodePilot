@@ -11,3 +11,5 @@
 Explained does not mean practiced or demonstrated. Record actual learner answers only.
 
 Snapshots, transactions, worker ownership and baseline classification explained in M1 lesson; exercises/teach-back unassessed.
+
+CST/AST, static-analysis limits and advisory metrics introduced in M2; teach-back and exercise remain unassessed.

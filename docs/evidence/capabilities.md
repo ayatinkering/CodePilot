@@ -6,7 +6,7 @@ Date: 2026-11-25. No CV capability is inferred from a requirement or a file name
 |---|---|---|---|---|
 | Config/schema/health | Verified locally | backend/codepilot/{config,storage,api,cli}.py | tests/unit/test_foundation.py; M0-verification.md | No jobs yet |
 | GitHub issue ingestion | Planned | — | — | Development pushes are not product PR automation |
-| Structural analysis | Planned | — | — | No complete call-graph claim |
+| Structural analysis | Core locally verified; partial | backend/codepilot/indexing.py | M2-verification.md | No complete call graph; alias/cross-file linking not implemented |
 | Semantic retrieval | Planned | — | No local embedding package/cache found | No fake vectors |
 | Gemini planning/generation | Planned; live blocked | — | No GEMINI_API_KEY/GOOGLE_API_KEY found | Model not selected/verified |
 | Generated tests/repair/regression | Planned | — | — | No success rates |

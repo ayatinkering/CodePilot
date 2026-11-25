@@ -26,3 +26,12 @@ flow verified. Container boundary checks blocked because Docker is not running.
 See evidence/M1-verification.md and lessons/M1-snapshots-and-jobs.md.
 Commit reference: commit introducing this section; push pending at creation.
 Do not mark M1 complete until live runner, timeout and cancellation checks pass.
+
+M1 partial remote confirmed: `694f032a4a753399a3744e106b9ed9b0fb907170`.
+
+## M2 structural core
+Real Tree-sitter symbols, raw imports, heuristic/unresolved calls and advisory
+metrics. 20 tests passed; actual CLI indexed 15 Python files / 68 symbols from
+M1 commit. See evidence/M2-verification.md and lessons/M2-structural-index.md.
+Cross-file/alias linking remains partial. Commit reference: introducing commit;
+push pending at creation. No live generation or end-to-end repair claimed.

@@ -17,7 +17,7 @@ def main():
     submit = commands.add_parser("submit")
     submit.add_argument("repository", type=Path)
     submit.add_argument("task")
-    for name in ["status", "cancel"]:
+    for name in ["status", "cancel", "index"]:
         command = commands.add_parser(name)
         command.add_argument("run_id")
     args = parser.parse_args()
@@ -62,6 +62,16 @@ def main():
     elif args.command == "cancel":
         jobs.transition(args.run_id, "cancelled", "operator_cancelled")
         print(json.dumps({"state": "cancelled"}))
+    elif args.command == "index":
+        from codepilot.indexing import findings, index_snapshot
+
+        run = jobs.get(args.run_id)
+        directory = settings.data_dir / "runs" / run["id"]
+        manifest = json.loads((directory / "snapshot.json").read_text())
+        result = index_snapshot(directory / "baseline", manifest)
+        result["findings"] = findings(result)
+        (directory / "index.json").write_text(json.dumps(result, indent=2))
+        print(json.dumps(result, indent=2))
     else:
         print(
             json.dumps({"run": jobs.get(args.run_id), "events": jobs.events(args.run_id)}, indent=2)

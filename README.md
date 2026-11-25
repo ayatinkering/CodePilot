@@ -1,7 +1,7 @@
 # CodePilot
 
 An AI-assisted Python maintenance research prototype, started 25 November 2026.
-**In development: M0 foundation only. No issue-to-patch or live-model success claimed.**
+**In development: foundation, partial worker and structural indexing. No issue-to-patch or live-model success claimed.**
 Gemini is the selected generation provider. There is no model training or fine-tuning.
 
 ## Run the foundation
@@ -72,3 +72,12 @@ interrupted. Retry and remote acquisition are not implemented. Snapshots/reports
 under `.codepilot/runs` may contain repository source: keep them local. Image build
 requires network; execution never installs target dependencies. Docker access is
 privileged; never expose this worker publicly or mount the socket into target code.
+
+## Structural inspection
+
+After a worker has acquired a run snapshot (even if baseline fails due to unavailable
+Docker), `uv run --locked codepilot index RUN_ID` prints and saves a real Tree-sitter
+index in that run's directory. This debug inspection does not bypass the baseline
+gate or mark the run validated. Symbols, ranges, parse errors, advisory metrics and
+heuristic/unresolved call references are inspectable; cross-file import resolution
+and semantic retrieval are not implemented yet.
