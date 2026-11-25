@@ -40,11 +40,11 @@ def prepare_demo(data_dir: Path):
                 (target / "tests").mkdir()
                 (target / "tests/.gitkeep").write_text("")
             commands = [
-                ["init", "-b", "codex/demo-fixture"],
+                ["init", "-b", "demo/fixture"],
                 ["config", "user.name", "CodePilot demo"],
                 ["config", "user.email", "codepilot-demo@example.invalid"],
                 ["add", "src", "tests"],
-                ["commit", "-m", "Add AI-assisted controlled CodePilot demo fixture"],
+                ["commit", "-m", "Add controlled CodePilot demo fixture"],
             ]
             for command in commands:
                 subprocess.run(

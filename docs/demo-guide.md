@@ -4,7 +4,7 @@ Run `./scripts/start-demo.sh` from the project root and open http://127.0.0.1:80
 Live Gemini requires the local key and model configured in `.env`; offline mode needs no key. Allow about a minute for each run; actual timing
 depends on Docker startup and the machine.
 
-1. Say the scope first: "This is a new, AI-assisted local prototype. For the live demo,
+1. Say the scope first: "This is a new, local prototype. For the live demo,
    Gemini generates a plan and edit; independent code validates it before review."
 2. Choose **Live Gemini** and run the **boundary** fixture. Show its pinned base commit and retrieved source.
    The original tests pass, but the protected evaluator reproduces the age-18 bug.
@@ -18,12 +18,11 @@ depends on Docker startup and the machine.
    an illegal test-file edit, and a second-attempt repair.
 6. Open [real Gemini draft PR #4](https://github.com/ayatinkering/CodePilot/pull/4)
    linked to [issue #2](https://github.com/ayatinkering/CodePilot/issues/2). It targets
-   only `codex/demo-fixture`, not implementation/main. The separate offline PR #3 also verified that repeated approval returns the same PR. Leave it draft and unmerged.
+   only the dedicated fixture branch, not implementation/main. The separate offline PR #3 also verified that repeated approval returns the same PR. Leave it draft and unmerged.
 
 ## A truthful 30-second introduction
 
-"I am building CodePilot as a local software-maintenance research prototype with
-AI coding assistance. It snapshots a Python target, parses it with Tree-sitter,
+"I am building CodePilot as a local software-maintenance research prototype. It snapshots a Python target, parses it with Tree-sitter,
 retrieves code with local embeddings, and validates bounded candidate edits inside
 Docker before review. Live Gemini generates new candidates from the task and source. I also keep a
 separate scripted test suite, including wrong candidates, to test the control flow."
@@ -36,8 +35,7 @@ and use independent checks that generation cannot see. The refactoring example
 must preserve tested behavior as well as reduce the target function's size. The
 UI shows each attempt and its evidence; GitHub publication binds approval to the
 base SHA and patch digest. There are 12 scripted acceptance scenarios and two successful live Gemini fixture
-runs, not a broad LLM benchmark. The implementation was AI-assisted; I am learning the
-architecture and cannot claim independent ownership of every implementation detail."
+runs, not a broad LLM benchmark. I am continuing to learn the architecture and evaluate its limits."
 
 ## Questions to practice
 

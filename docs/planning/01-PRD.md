@@ -6,7 +6,7 @@ Repository contents endpoint reported an empty repository when checked for this 
 
 ## 1. Purpose and truthful starting point
 
-Build an inspectable, reproducible AI-assisted software engineering research prototype. A user supplies a Python repository and a GitHub issue (or local task). CodePilot indexes the repository, retrieves relevant evidence, proposes a bounded plan, creates a patch, generates candidate tests, executes independent validation, performs bounded repair, and prepares a human-reviewable GitHub PR. A React/FastAPI interface exposes the actual execution record.
+Build an inspectable, reproducible software engineering research prototype. A user supplies a Python repository and a GitHub issue (or local task). CodePilot indexes the repository, retrieves relevant evidence, proposes a bounded plan, creates a patch, generates candidate tests, executes independent validation, performs bounded repair, and prepares a human-reviewable GitHub PR. A React/FastAPI interface exposes the actual execution record.
 
 Ayati has disclosed that this project has not yet been implemented. Treat all CV capability statements as requirements, not evidence of completed work. Do not backdate commits, fabricate metrics, invent historical decisions, or describe AI-authored work as independently written by Ayati. Record actual contributions and what Ayati has learned, modified, and verified. New implementation does not retroactively validate an earlier CV claim.
 
@@ -152,7 +152,7 @@ Development of CodePilot and CodePilot's own PR-publishing feature are separate 
 Product reads an issue and binds it to a base SHA. After ready_for_review, show diff and validation evidence. User chooses Create draft PR. For automated controlled demos, a preauthorized repository allowlist can replace a per-run click; never publish to arbitrary third-party repositories.
 Use backend-only credentials with minimum documented access. Support one authentication route end-to-end first. GitHub App installation auth is an extension unless selected as the actual initial route. If selected, implement token refresh and permission/error handling genuinely.
 Before publishing, ensure base/head expectations and approved patch digest are unchanged. If target moved, mark stale and revalidate against the new base rather than silently claiming old results. Use deterministic branch name from run ID and a PR marker; reconcile prior branch/PR before retry. Network uncertainty becomes publication_uncertain until reconciled. Never auto-merge or force-push.
-PR body: source issue, purpose, exact base SHA, changes, test results and baseline status, known limitations, model configuration, AI-assisted provenance and run identifier. Do not auto-close unrelated issues.
+PR body: source issue, purpose, exact base SHA, changes, test results and baseline status, known limitations, model configuration, generation-provider provenance and run identifier. Do not auto-close unrelated issues.
 Acceptance: one real issue-to-draft-PR run on an authorized test target; duplicate button/retry yields one PR; no token in logs, browser bundle or target execution; failed validation disables publication by default.
 
 ### F11 Interface and observability
@@ -255,7 +255,7 @@ Build a runnable CLI/debug entry alongside the API so backend progress is demons
 - Evaluation report includes failures and scope, never fabricated rates.
 - Each major feature has a pushed commit and lesson; remote HEAD confirmation is recorded.
 - README explicitly states local single-user/trusted-target boundaries and unfinished GitHub App automation, if any.
-- Interview answers describe the implementation as it exists, including AI assistance, limitations and Ayati's verified understanding.
+- Interview answers describe the implementation as it exists, including limitations and verified understanding.
 
 ## 12. Sources and facts to verify during implementation
 

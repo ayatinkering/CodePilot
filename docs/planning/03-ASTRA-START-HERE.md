@@ -24,10 +24,10 @@ I need explanations from scratch through advanced level because I do not yet und
 
 The user has explicitly requested a commit and push for EVERY major feature. Treat each M0–M10 milestone as at least one meaningful checkpoint, with additional cohesive commits when useful. Do not ask again for routine authorized commits/pushes.
 
-- If the repo is genuinely empty, initialize its default branch (main unless configured otherwise) and push the verified bootstrap there. Thereafter use a durable codex/codepilot-build branch, push each milestone, and maintain a draft implementation PR to the default branch. Do not auto-merge that implementation PR without explicit authorization. If an established branch/workflow exists, preserve it and adapt safely.
+- If the repo is genuinely empty, initialize its default branch (main unless configured otherwise) and push the verified bootstrap there. Thereafter use a durable feature branch, push each milestone, and maintain a draft implementation PR to the default branch. Do not auto-merge that implementation PR without explicit authorization. If an established branch/workflow exists, preserve it and adapt safely.
 - Before every milestone commit: run relevant checks; inspect git diff/status and staged contents; confirm no secrets, caches, private documents, unrelated work, or fabricated reports.
 - Include source, meaningful tests, lesson, ADR and evidence updates together. Stage explicit intended paths, not an indiscriminate parent-directory git add.
-- Use accurate messages such as feat(indexing): extract Python symbols and approximate call edges. Do not backdate or disguise AI assistance.
+- Use accurate messages such as feat(indexing): extract Python symbols and approximate call edges. Do not backdate commits or misrepresent contributions.
 - Push the named branch without force. Verify the remote branch SHA matches the pushed commit through an authenticated read/ls-remote where available.
 - Report feature, evidence, lesson location, commit SHA, branch and push result. Update the milestone ledger with commit refs; avoid self-referential commit-hash edits that create infinite commits.
 - If a push is blocked, retain the local commit, report the exact error and continue independent work. Do not claim it reached GitHub. At most ask for the missing authentication/permission actually required.

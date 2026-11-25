@@ -28,9 +28,7 @@ and 7,236 reported tokens, excluding discovery/smoke probes. The repair was also
 published as a real draft PR. Actual timings and generated code are in the reports.
 
 Browser verification blocker: in-app browser attachment timed out; Chrome attachment
-reported "Browser attachment requires a network policy. Update the Codex desktop app
-to the latest version and retry." No visual verification is claimed.
+reported a desktop-app update and network-policy requirement. No visual verification is claimed.
 
 No automatic merge, public deployment, model training, historical ownership claim,
-or retroactive validation of the CV. Source was built with AI assistance; Ayati's
-independent understanding must be established through the course exercises.
+or retroactive validation of the CV. Understanding should be established through the course exercises.

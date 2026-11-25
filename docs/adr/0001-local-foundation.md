@@ -8,7 +8,7 @@ long-running tasks. API handlers will not run repository tests or model loops.
 PostgreSQL and a distributed queue would improve multi-user concurrency but add
 services before a measured need. SQLite is not a claim of enterprise scalability.
 
-Use an isolated development worktree on `codex/codepilot-build`, leaving `main`
+Use an isolated development worktree on a feature branch, leaving `main`
 with the initial README. Product candidate checkouts will be separate again.
 Keep run limits immutable and persist their JSON per run. Schema version 1 defines
 run/event ownership and unique per-run event sequence numbers; later migrations

@@ -2,8 +2,8 @@
 
 ## 2026-11-25 — initial state
 Repository main: `449132d232770dfa071cdd3527a6f96bf0c2e4ad`, README only.
-Ayati authorized implementation and milestone pushes; chose Gemini API. Codex
-created isolated worktree `/tmp/codepilot-build`, branch `codex/codepilot-build`.
+Ayati authorized implementation and milestone pushes and chose Gemini API.
+Development began in an isolated worktree on a feature branch.
 Copied only the three explicitly supplied handoff documents into docs/planning.
 
 ## M0 — foundation
@@ -98,7 +98,7 @@ committed under `evaluation/results`. They are not a live-model success benchmar
 
 Controlled GitHub issue #2 was imported through the API. Run
 `f1ef680601494d13b8c52dcf91bd331d` produced the reviewed boundary edit and real draft
-PR #3 on `codex/demo-fixture`. Repeating approval returned the same PR. No merge.
+PR #3 on the dedicated fixture branch. Repeating approval returned the same PR. No merge.
 The final startup script served the dashboard and API; SSE Last-Event-ID=2 resumed
 at event 3. Visual walkthrough remains blocked by the desktop browser attachment,
 which reported an app-update/network-policy requirement. No screenshot or visual

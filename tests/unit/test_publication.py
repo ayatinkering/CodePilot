@@ -59,7 +59,7 @@ def ready(tmp_path):
                 "boundary": {
                     "publication_allowed": True,
                     "github_repo": settings.github_repo,
-                    "base_branch": "codex/demo-fixture",
+                    "base_branch": "demo/fixture",
                 }
             }
         )
@@ -89,7 +89,7 @@ def test_publication_reconciles_without_duplicate_writes(ready, monkeypatch):
         if "/git/ref/" in path:
             return {"object": {"sha": "a" * 40}}
         if "/matching-refs/" in path:
-            return [{"ref": "refs/heads/codex/codepilot-run-" + run, "object": {"sha": "c" * 40}}]
+            return [{"ref": "refs/heads/codepilot/run-" + run, "object": {"sha": "c" * 40}}]
         if "/commits/" in path:
             return {
                 "message": f"CodePilot run {run}; patch {digest}",

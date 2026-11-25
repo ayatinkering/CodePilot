@@ -101,7 +101,7 @@ def publish(jobs, settings, run_id, expected_base, expected_digest):
         base = github(f"{prefix}/git/ref/heads/{base_branch}")["object"]["sha"]
         if base != expected_base:
             raise ValueError("Remote base changed; create and validate a new run")
-        branch = "codex/codepilot-run-" + run_id
+        branch = "codepilot/run-" + run_id
         marker = f"CodePilot run {run_id}; patch {expected_digest}"
         jobs.transition(run_id, "publishing")
         try:

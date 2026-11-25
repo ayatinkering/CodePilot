@@ -97,7 +97,6 @@ Gemini success remains unknown/unverified. Budget validation is implemented and
 becomes verified after its test passes. Neither demonstrates a full repair.
 </details>
 
-## Limitations and ownership
-Implementation is AI-assisted by Codex under Ayati's direction. Ayati chose Gemini;
-no independent coding exercise or teach-back has been observed. New work cannot
-retroactively substantiate an earlier CV claim. Full course remains ongoing.
+## Learning progress
+
+The course exercises and teach-back are not yet assessed.

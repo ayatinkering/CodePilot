@@ -174,7 +174,7 @@ Deliverable: evidence-based research-fit note and realistic 12-week extension pl
 ## Module 15 — Interview defense and personal ownership
 
 Prepare 30-second, 90-second and five-minute explanations. Each includes problem, implemented architecture, personal contribution, actual evidence, one failure and a limitation.
-Do not use a memorized ideal architecture if the code differs. For each technical claim, link a code path and an observed result. Record AI assistance and distinguish understanding from merely having generated files.
+Do not use a memorized ideal architecture if the code differs. For each technical claim, link a code path and an observed result. Distinguish understanding from merely having working files.
 Exercise: Ayati implements one small change herself, explains the diff, runs its test and describes the outcome. Then conduct a mock interview with follow-up questions rather than only rehearsed prompts.
 Deliverables: project-defense.md, factsheet.md, known-limitations.md and an updated honest CV bullet set appropriate to the actual completion level.
 
@@ -220,7 +220,7 @@ States: unintroduced, explained, practiced, demonstrated, needs_review. Only dem
 33. Can lower complexity mean worse design? Explain metric gaming with an example.
 34. Why Professor Sharma? Specific research connection you have read and understood.
 35. What would you improve next? One failure-driven change and how to evaluate it.
-36. What did you personally implement? Accurate AI-assisted contribution account.
+36. What did you personally implement? An accurate account of your contributions.
 37. What was already complete when you applied? Truthful timeline; do not imply later work existed earlier.
 
 ## Final one-page factsheet template

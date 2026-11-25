@@ -1,107 +1,139 @@
 # CodePilot
 
-A local, AI-assisted software-maintenance research prototype. **This MVP supports live Gemini generation and a separately labeled offline scripted mode
-on controlled Python fixtures.**
-Two live Gemini fixture runs (repair and refactoring) passed independent Docker
-validation. [Raw live evidence](docs/evidence/live-generation.json) is separate from
-the scripted acceptance suite.
+CodePilot helps you inspect, fix and refactor Python code. It reads a task, finds
+relevant source, asks Gemini for a proposed change, and tests that change in Docker.
+You review the diff and test results before creating a draft pull request.
 
-Parsing, local embeddings, hybrid retrieval, Docker validation, the review API/UI,
-GitHub issue import, and approved draft PR publication are implemented.
+The current version runs locally and supports controlled Python examples. Live
+Gemini generates new proposals; a separate offline mode uses fixed examples for
+repeatable testing.
 
-## Start the demo
+## What it does
 
-Requirements: Linux, Git, Python 3.12, uv, Node.js 22.12+, and running Docker
-Engine/Desktop. GitHub CLI authentication is only needed for issue/PR operations.
-Initial installation/model/image preparation needs network access; offline runs do not.
+- Indexes Python symbols with Tree-sitter and finds relevant code with local embeddings.
+- Generates plans, bounded edits and supporting tests with Gemini.
+- Runs original tests and independent checks in isolated Docker containers.
+- Shows each attempt, its diff, test results and retrieved source in a React dashboard.
+- Imports GitHub issues and publishes reviewed changes as draft pull requests.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    User[Task or GitHub issue] --> UI[React dashboard]
+    UI --> API[FastAPI]
+    API <--> DB[(SQLite: runs and events)]
+    DB <--> Worker[Background worker]
+    Worker --> Snapshot[Read-only repository snapshot]
+    Snapshot --> Index[Tree-sitter and local embeddings]
+    Index --> Gemini[Gemini: plan and proposed edit]
+    Gemini --> Policy[Validate paths, hashes and edit limits]
+    Policy --> Docker[Docker: original and independent tests]
+    Docker --> Results[Diff and validation results]
+    Results --> DB
+    DB --> UI
+    UI --> Review[Approve exact patch]
+    Review --> PR[GitHub draft pull request]
+```
+
+The API manages requests; the worker handles indexing, generation and testing.
+Repository tests run inside Docker, not on the host. The protected evaluator stays
+outside Gemini's context. Failed checks trigger a bounded retry or stop the run.
+
+## Folder structure
+
+```text
+backend/codepilot/   API, worker, retrieval, generation and GitHub integration
+frontend/           React dashboard
+runner/             Docker image and test harness
+fixtures/           Small repair and refactoring examples
+evaluation/         Independent checks and recorded evaluation results
+tests/              Unit and integration tests
+scripts/            Local startup script
+docs/               Architecture decisions, lessons and verification evidence
+.codepilot/         Local runs, snapshots, models and database (not committed)
+```
+
+## Installation
+
+You need Linux, Git, Python 3.12, [uv](https://docs.astral.sh/uv/), Node.js 22.12+
+and a running Docker Engine or Docker Desktop. GitHub CLI is optional unless you
+want to import issues or publish draft PRs.
 
 ```sh
-git clone --branch codex/codepilot-build https://github.com/ayatinkering/CodePilot.git
+git clone https://github.com/ayatinkering/CodePilot.git
 cd CodePilot
 uv sync --locked
 npm ci --prefix frontend
 npm run build --prefix frontend
 uv run --locked codepilot prepare-model
 docker build -t codepilot-runner:dev runner
-# Copy only on first setup; do not overwrite an existing .env.
 cp -n .env.example .env
 docker image inspect codepilot-runner:dev --format '{{.Id}}'
 ```
 
-Put the printed `sha256:...` value after `CODEPILOT_RUNNER_IMAGE=` in `.env`.
-No API key is required for offline mode. For live generation, set `GEMINI_API_KEY`
-in the ignored `.env` and set `CODEPILOT_MODEL=gemini-3.5-flash`. Never paste keys
-in chat or commit them. Live mode sends selected task/source to Google and uses
-API quota. Then run:
+Copy the printed image ID into `.env`. For live generation, add your Gemini key:
+
+```dotenv
+CODEPILOT_RUNNER_IMAGE=sha256:your-image-id
+CODEPILOT_MODEL=gemini-3.5-flash
+GEMINI_API_KEY=your-key
+```
+
+Keep `.env` private. Offline mode needs no API key. The first install downloads
+dependencies, the embedding model and the Docker image; live mode sends selected
+task/source content to Google and uses your API quota.
+
+## Run
 
 ```sh
 ./scripts/start-demo.sh
 ```
 
-Open [CodePilot locally](http://127.0.0.1:8000). Keep the terminal open; Ctrl-C stops
-both processes. The startup script prepares five trusted Git fixture repositories.
-Select **boundary**, choose **Live Gemini** (or **Offline scripted demo**), and click
-**Start run**. Live mode generates a new plan, patch and auxiliary test from the task. After
-validation, inspect **Diff**, **Checks**, **Plan**, and **Source**. Select **refactor**
-for the extract-helper example. The remaining targets demonstrate failures.
-In offline mode, task text changes retrieval, but the proposal remains a fixed fixture
-script. Live mode never falls back to that script: outages, quotas, malformed output
-and validation failures are recorded as stopped runs. Use Retry after resolving a
-provider problem; it keeps the original base and model. In-flight calls are bounded
-to 60 seconds, so cancellation may wait for the current request to finish.
+Open **[localhost:8000](http://127.0.0.1:8000)**. Choose **boundary** for a bug fix or
+**refactor** for helper extraction, select a generation mode, and click **Start run**.
+Use the **Diff**, **Checks**, **Plan** and **Source** tabs to review the result.
+The other examples demonstrate failed baselines, missing dependencies and zero tests.
 
-If port 8000 or the worker lock is occupied, stop the previous CodePilot process.
-Do not run the evaluation command while the worker is running. An interrupted run
-is recorded on worker restart; retry creates a new run at the same base commit.
+Keep the terminal open. Press Ctrl-C to stop the server and worker. If the port or
+worker lock is occupied, stop the previous instance first. Gemini failures are shown
+explicitly; live runs never silently switch to scripted output.
 
-## GitHub demonstration
+## GitHub integration
 
-The implementation is on `codex/codepilot-build`, with [draft implementation PR #1](https://github.com/ayatinkering/CodePilot/pull/1).
-A separate `codex/demo-fixture` branch contains only the synthetic discount target.
-[Controlled issue #2](https://github.com/ayatinkering/CodePilot/issues/2) can be imported
-using the dashboard's issue-number field. The local operator has opted this fixture
-into publication; a new installation defaults to publication disabled.
+Run `gh auth login` to connect your account. Import an issue by number in the
+dashboard. Draft publication requires an operator-approved repository and base
+branch, plus approval of the exact validated patch. New installations disable
+publication by default. See the [publication setup](docs/github-setup.md).
 
-For another installation, explicitly bind the registered boundary fixture in ignored
-`.codepilot/repositories.json`: `publication_allowed: true`, `github_repo:
-"ayatinkering/CodePilot"`, `base_branch: "codex/demo-fixture"`. The local fixture's
-base SHA must equal that remote branch. A fresh generated fixture has a different
-commit SHA: clone the dedicated branch into a new trusted target directory and set
-that registry entry's absolute `path` to the clone. Do not repoint it to main.
-Authentication stays in the host `gh` configuration, never in target containers.
+The workflow has produced a [live repair draft PR](https://github.com/ayatinkering/CodePilot/pull/4).
+Generated PRs are never merged automatically.
 
-Review the exact patch and evidence, check the approval box, then create a **draft**
-PR. Changed bases or modified candidates are rejected. Ambiguous publication can be
-reconciled by approving the same digest again. No force push or automatic merge.
-
-## Verify
+## Tests and evidence
 
 ```sh
+uv run --locked pytest -q
 uv run --locked ruff check .
 uv run --locked ruff format --check .
-uv run --locked pytest -q
+# Include Docker integration tests:
 CODEPILOT_TEST_RUNNER_IMAGE=$(docker image inspect codepilot-runner:dev --format '{{.Id}}') \
   uv run --locked pytest -q
-# Stop the worker first:
+# Stop the worker before running the offline evaluation:
 uv run --locked codepilot evaluate
 ```
 
-The evaluation records **12 scripted acceptance scenarios over two synthetic source
-fixtures**, including expected rejections. It is not an LLM benchmark, and the A/B/C
-retrieval cases do not establish quality improvements because generation is fixed.
-See [raw results and summary](evaluation/results/summary.md),
-[capability ledger](docs/evidence/capabilities.md), and [demo/interview guide](docs/demo-guide.md).
+Two live Gemini examples passed independent Docker checks: a bug repair and a
+helper extraction. The offline suite covers 12 acceptance scenarios, including
+expected failures. These small examples are not a general repair benchmark.
 
-## Boundaries
+[Live results](docs/evidence/live-generation.json) ·
+[Offline results](evaluation/results/summary.md) ·
+[Demo guide](docs/demo-guide.md)
 
-Local single-user, trusted Python fixtures only. No arbitrary repository execution,
-remote GitHub App/webhooks, public hosting, automatic merging, model training, or
-unrestricted AI execution. Live generation uses a pinned per-run model, bounded calls
-and tokens, typed JSON output, protected tests and human review. Tree-sitter edges and smell metrics are approximate. Test success is not
-proof of correctness. Browser visual verification remains pending due to the desktop
-app's unavailable browser attachment; API flows and frontend compilation are tested.
+## Current scope
 
-The runner uses a pinned image, read-only source/root, non-root user, no network,
-limited resources, and no host secrets or Docker socket. Docker itself is privileged;
-keep the control plane on loopback. Runtime source, reports, database and `.env` stay
-under ignored local paths. Dependencies are locked; no project license is selected.
+This is a local, single-user prototype for trusted Python examples. It does not yet
+support arbitrary repositories, public hosting or GitHub App webhooks. Structural
+analysis is approximate, and passing tests do not prove every behavior is correct.
+The frontend build and API flows are tested; a full visual browser walkthrough is
+still pending.

@@ -259,7 +259,6 @@
       "publication": {
         "url": "https://github.com/ayatinkering/CodePilot/pull/4",
         "number": 4,
-        "branch": "codex/codepilot-run-b6432691a6a843d29c9e0e17f0797a0f",
         "base_sha": "1625f43e04bf6913461dc2c895af85671a53c472",
         "patch_digest": "61713344563dc95790db0493b1b7600c190d6d05767353ce6df14789138bcc2d"
       }
