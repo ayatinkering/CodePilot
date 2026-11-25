@@ -31,3 +31,13 @@ of every secret embedded in arbitrary source. Explicit trusted target scope rema
 Live Gemini smoke blocked on absent key/model. SDK request contract and failure
 behavior tested locally with a fake client; this does not establish remote API
 acceptance or planning quality. Adapter not yet integrated into the worker pipeline.
+
+## Live correction, 2026-11-25
+Credentials now authenticate successfully. Live requests exposed the legacy
+response_schema field rejecting additional_properties. Use response_json_schema
+with Plan.model_json_schema(), retaining local strict validation. Official source:
+https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-structured-outputs/
+The listed gemini-2.5-flash model rejected new-user generation (404); the service
+recommended gemini-3.8-flash. Explicitly selected that model. It returned HTTP 503
+high demand; no successful live plan is claimed. Safe categorized errors preserve
+this distinction without logging raw credential-bearing provider errors.

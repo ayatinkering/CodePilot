@@ -79,3 +79,9 @@ and independent tests, not merely a valid response schema.
 
 Remaining: live request, available model/settings evidence, durable run budgets,
 cancellation, retrieval integration, patch/test generation, full course concepts.
+
+## Live failures taught us something
+A valid key and a listed model do not prove generation works. The first requests
+found a real schema API mismatch, then an inaccessible older model, then temporary
+503 errors from gemini-3.8-flash. The schema regression test now checks the JSON
+Schema field. These failures are evidence, not successful planning results.

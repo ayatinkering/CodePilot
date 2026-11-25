@@ -99,7 +99,8 @@ def test_gemini_sdk_request_and_transport_error(monkeypatch):
             if self.fail:
                 raise httpx.ConnectError("sensitive-request-detail")
             assert kwargs["config"].automatic_function_calling.disable
-            assert kwargs["config"].response_schema is providers.Plan
+            assert kwargs["config"].response_schema is None
+            assert kwargs["config"].response_json_schema == providers.Plan.model_json_schema()
             return types.GenerateContentResponse(
                 candidates=[
                     types.Candidate(content=types.Content(parts=[types.Part(text=output())]))
@@ -115,5 +116,26 @@ def test_gemini_sdk_request_and_transport_error(monkeypatch):
     assert provider.generate("synthetic prompt", 2048).tokens == 42
     provider.client.fail = True
     with pytest.raises(ProviderFailure, match="^gemini_request_failed$"):
+        provider.generate("synthetic prompt", 2048)
+    provider.close()
+
+
+@pytest.mark.parametrize(
+    "code,category",
+    [(400, "invalid_request"), (404, "model_unavailable"), (503, "service_unavailable")],
+)
+def test_provider_reports_safe_error_category(monkeypatch, code, category):
+    from types import SimpleNamespace
+
+    from codepilot import providers
+    from google.genai import errors
+
+    def failed(**kwargs):
+        raise errors.APIError(code, {"error": {"message": "sensitive-synthetic-detail"}})
+
+    client = SimpleNamespace(models=SimpleNamespace(generate_content=failed), close=lambda: None)
+    monkeypatch.setattr(providers.genai, "Client", lambda **kwargs: client)
+    provider = GeminiProvider("fixture-not-real", "gemini-test-only")
+    with pytest.raises(ProviderFailure, match=f"^gemini_{category}$"):
         provider.generate("synthetic prompt", 2048)
     provider.close()

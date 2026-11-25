@@ -34,3 +34,12 @@ executed tests and missing runner. stdout reports are auxiliary evidence on trus
 targets, not tamper-proof proofs against malicious tests (which share the Python
 process). Protected evaluator design is still required. If the daemon disappears,
 cleanup may need operator reconciliation. This is not a public untrusted runner.
+
+## Live correction, 2026-11-25
+Docker 29.6.1 is now available. Copying into a read-only container failed; a host
+bind path also failed because the Desktop daemon could not see the executor's
+/tmp. Source now transfers through Docker cp into a uniquely named volume using a
+never-started staging container. Execution mounts that volume read-only and copies
+into bounded /work tmpfs. No host path or credentials are mounted. Cleanup removes
+both containers and the volume. The local log driver required compress=false when
+max-file=1. Base image digest and all pytest dependencies are now pinned.

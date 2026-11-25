@@ -42,7 +42,12 @@ def run_tests(snapshot: Path, image: str, seconds=120, cancelled=lambda: False):
     except (OSError, subprocess.TimeoutExpired):
         return {"status": "environment_error", "reason": "docker_unavailable"}
     name = "codepilot-" + uuid.uuid4().hex
-    # Copy source through Docker's archive protocol: no writable host mounts, no secrets.
+    # Stage source through Docker's API so remote/Desktop daemons need no host paths.
+    source = snapshot.resolve(strict=True)
+    if not source.is_dir():
+        raise ValueError("Invalid snapshot path")
+    volume = name + "-source"
+    seed = name + "-seed"
     args = [
         "create",
         "--name",
@@ -50,6 +55,7 @@ def run_tests(snapshot: Path, image: str, seconds=120, cancelled=lambda: False):
         "--log-driver=local",
         "--log-opt=max-size=1m",
         "--log-opt=max-file=1",
+        "--log-opt=compress=false",
         "--network=none",
         "--read-only",
         "--cap-drop=ALL",
@@ -61,14 +67,29 @@ def run_tests(snapshot: Path, image: str, seconds=120, cancelled=lambda: False):
         "--tmpfs=/tmp:rw,noexec,nosuid,size=64m",
         "--tmpfs=/work:rw,nosuid,size=64m",
         "--env=PYTHONDONTWRITEBYTECODE=1",
+        "--mount",
+        f"type=volume,src={volume},dst=/source,readonly",
         image,
     ]
     started = time.monotonic()
     try:
+        if docker("volume", "create", volume).returncode:
+            return {"status": "environment_error", "reason": "source_volume_failed"}
+        # This staging container is never started; no repository code runs here.
+        if docker(
+            "create",
+            "--name",
+            seed,
+            "--entrypoint=/bin/true",
+            "--mount",
+            f"type=volume,src={volume},dst=/source",
+            image,
+        ).returncode:
+            return {"status": "environment_error", "reason": "source_stage_failed"}
+        if docker("cp", str(source) + "/.", seed + ":/source").returncode:
+            return {"status": "environment_error", "reason": "source_copy_failed"}
         if docker(*args).returncode:
             return {"status": "environment_error", "reason": "container_create_failed"}
-        if docker("cp", str(snapshot.resolve()) + "/.", name + ":/source").returncode:
-            return {"status": "environment_error", "reason": "source_copy_failed"}
         # Bound Docker logs at the daemon and return only a capped tail.
         if docker("start", name).returncode:
             return {"status": "environment_error", "reason": "container_start_failed"}
@@ -109,6 +130,7 @@ def run_tests(snapshot: Path, image: str, seconds=120, cancelled=lambda: False):
         return {"status": "environment_error", "reason": "docker_control_failed"}
     finally:
         try:
-            docker("rm", "--force", name)
+            docker("rm", "--force", name, seed)
+            docker("volume", "rm", volume)
         except (OSError, subprocess.TimeoutExpired):
             pass  # Operator must reconcile orphan containers if the daemon is lost.

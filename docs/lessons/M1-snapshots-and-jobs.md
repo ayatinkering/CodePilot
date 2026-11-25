@@ -85,3 +85,11 @@ already have taken effect even if the worker did not receive the response.
 Connection: both refactoring and repair require a reproducible pre-change baseline.
 This supports the PRD lifecycle but does not yet fulfill a CV claim of automated
 repair. Learner understanding remains unassessed; implementation is AI-assisted.
+
+## Observed live results, 2026-11-25
+Seven opt-in real Docker checks passed in 17.11 seconds. They cover passing tests,
+assertion failure, missing dependency, no tests, non-root/no capabilities/seccomp,
+network denial, absence of host secrets, source/root write denial, timeout,
+cancellation and container/volume cleanup. Run with CODEPILOT_TEST_RUNNER_IMAGE
+set to the built image ID. Source transfer and logging failed initially and were
+fixed (ADR 0002). A sandbox design written on paper was not enough.

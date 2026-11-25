@@ -87,11 +87,21 @@ class GeminiProvider:
                     temperature=0,
                     max_output_tokens=max_output_tokens,
                     response_mime_type="application/json",
-                    response_schema=Plan,
+                    response_json_schema=Plan.model_json_schema(),
                     automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
                 ),
             )
-        except (errors.APIError, httpx.HTTPError, OSError, TimeoutError):
+        except errors.APIError as exc:
+            category = {
+                400: "invalid_request",
+                401: "authentication_failed",
+                403: "permission_denied",
+                404: "model_unavailable",
+                429: "rate_or_quota_limit",
+                503: "service_unavailable",
+            }.get(exc.code, "request_failed")
+            raise ProviderFailure("gemini_" + category) from None
+        except (httpx.HTTPError, OSError, TimeoutError):
             # Never propagate provider exception text (may contain request/credential data).
             raise ProviderFailure("gemini_request_failed") from None
         if not response.text:

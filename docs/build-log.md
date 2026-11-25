@@ -57,3 +57,12 @@ remain planned, not complete. No remote deployment or product PR was created.
 PR editing hit an installed-gh GraphQL Projects-classic deprecation; used the
 GitHub REST PR update endpoint instead. This is a development tooling failure,
 not a product test failure. No merge performed.
+
+## Live infrastructure checkpoint, 2026-11-25
+User resumed after configuring Gemini and Docker. Credential/model listing works;
+Gemini schema compatibility fixed. gemini-3.8-flash generation returned 503.
+Seven live Docker tests passed (17.11s), including isolation/timeout/cancel cleanup.
+Fixed read-only source staging, Desktop host-path visibility and logging setup.
+Pinned runner base digest/dependencies. Work paused at user request before commit;
+resumed for basic MVP spanning M0–M10. Main project folder now holds the build
+branch; temporary worktree disappeared, and no secrets were committed.
